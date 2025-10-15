@@ -9,7 +9,6 @@ import { ArrowRight, Brain, Rocket, Sparkles, BookOpen, Globe, Award, ChevronRig
 import { LanguageSelector } from "@/components/language-selector";
 import heroImage from "@/assets/hero-image.webp";
 import Image from "next/image";
-
 // Define types for our color mapping
 type ColorType = "primary" | "secondary" | "accent";
 
@@ -115,7 +114,7 @@ const lpgccItems: LpgccItem[] = [
     title: "Grow",
     icon: TrendingUp,
     description: "Develop confidence, teamwork, and emotional intelligence",
-    color: "accent",
+    color: "primary",
     // detail: "Build self-awareness, empathy, and leadership skills through guided activities",
     benefits: ["Confidence building", "Emotional regulation", "Leadership skills", "Self-reflection"],
   },
@@ -171,6 +170,10 @@ export default function HomePage() {
             </Link>
             <Link href="#about" className="text-foreground hover:text-secondary font-semibold transition-smooth">
               About
+            </Link>
+              
+            <Link href="/school" className="text-foreground hover:text-secondary font-semibold transition-smooth">
+              School
             </Link>
           </nav>
           <div className="flex items-center gap-4">
@@ -332,7 +335,7 @@ export default function HomePage() {
               <p className="text-xl md:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
                 LPGCC is our unique approach, blending <span className="font-bold text-primary">IQ</span>,
                 <span className="font-bold text-accent">EQ</span>, and
-                <span className="font-bold text-secondary">creativity</span> to make learning fun and effective.
+                <span className="font-bold text-secondary"> creativity</span> to make learning fun and effective.
               </p>
             </div>
             <div className="flex flex-wrap justify-center gap-6 max-w-3xl mx-auto">
@@ -523,7 +526,7 @@ export default function HomePage() {
               </CardHeader>
               <CardContent className="text-center">
                 <p className="text-muted-foreground leading-relaxed">
-                  To become the leading EdTech platform globally, starting in the UAE and expanding to Algeria and beyond, transforming how learners prepare for tomorrow's economy.
+                  To become the leading EdTech platform globally, starting in Tunisia and expanding to UAE and beyond, transforming how learners prepare for tomorrow's economy.
                 </p>
               </CardContent>
             </Card>

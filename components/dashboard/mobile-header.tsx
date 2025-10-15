@@ -18,7 +18,7 @@ export function MobileHeader({ profile, onMenuClick }: MobileHeaderProps) {
 
         <div className="flex items-center space-x-2">
           <div className="text-xl">🎓</div>
-          <span className="font-bold text-gray-800">AI Learning Hub</span>
+          <span className="font-bold text-gray-800">Bloolabb hub</span>
         </div>
 
         <div className="flex items-center space-x-2 text-sm">
