@@ -21,6 +21,7 @@ const navigation = [
   { name: "Learn", href: "/learn", icon: BookOpen },
   { name: "Achievements", href: "/achievements", icon: Trophy },
   { name: "Leaderboard", href: "/leaderboard", icon: Users },
+  { name: "AI mentor", href: "/dashboard/ai-tutor", icon: Users },
   { name: "Settings", href: "/settings", icon: Settings },
 ]
 
