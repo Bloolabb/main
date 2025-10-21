@@ -126,7 +126,7 @@ A Duolingo-style learning platform for kids aged 6-18 to learn AI and entreprene
 
 **Default Admin Credentials**:
 - Email: `zvmmed@gmail.com`
-- Password: `zvmmed@gmail.com`
+- Password: ``
 
 Access the admin dashboard at `/admin/login`
 
