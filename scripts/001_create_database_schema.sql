@@ -1,4 +1,7 @@
 -- Create profiles table for user management
+-- Ensure pgcrypto for gen_random_uuid()
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   display_name TEXT NOT NULL,
@@ -101,48 +104,66 @@ ALTER TABLE public.badges ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_badges ENABLE ROW LEVEL SECURITY;
 
 -- Create RLS policies for profiles
+-- Profiles policies (drop if exist so script is idempotent)
+DROP POLICY IF EXISTS "Users can view their own profile" ON public.profiles;
 CREATE POLICY "Users can view their own profile" ON public.profiles
   FOR SELECT USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles;
 CREATE POLICY "Users can update their own profile" ON public.profiles
   FOR UPDATE USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Users can insert their own profile" ON public.profiles;
 CREATE POLICY "Users can insert their own profile" ON public.profiles
   FOR INSERT WITH CHECK (auth.uid() = id);
 
 -- Create RLS policies for learning content (public read access)
+-- Public read policies
+DROP POLICY IF EXISTS "Anyone can view learning tracks" ON public.learning_tracks;
 CREATE POLICY "Anyone can view learning tracks" ON public.learning_tracks
   FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Anyone can view modules" ON public.modules;
 CREATE POLICY "Anyone can view modules" ON public.modules
   FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Anyone can view lessons" ON public.lessons;
 CREATE POLICY "Anyone can view lessons" ON public.lessons
   FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Anyone can view exercises" ON public.exercises;
 CREATE POLICY "Anyone can view exercises" ON public.exercises
   FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Anyone can view badges" ON public.badges;
 CREATE POLICY "Anyone can view badges" ON public.badges
   FOR SELECT USING (true);
 
 -- Create RLS policies for user progress
+-- User progress policies
+DROP POLICY IF EXISTS "Users can view their own progress" ON public.user_progress;
 CREATE POLICY "Users can view their own progress" ON public.user_progress
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert their own progress" ON public.user_progress;
 CREATE POLICY "Users can insert their own progress" ON public.user_progress
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update their own progress" ON public.user_progress;
 CREATE POLICY "Users can update their own progress" ON public.user_progress
   FOR UPDATE USING (auth.uid() = user_id);
 
 -- Create RLS policies for user badges
+-- User badges policies
+DROP POLICY IF EXISTS "Users can view their own badges" ON public.user_badges;
 CREATE POLICY "Users can view their own badges" ON public.user_badges
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can view all user badges for leaderboard" ON public.user_badges;
 CREATE POLICY "Users can view all user badges for leaderboard" ON public.user_badges
   FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "System can insert user badges" ON public.user_badges;
 CREATE POLICY "System can insert user badges" ON public.user_badges
   FOR INSERT WITH CHECK (true);
 
