@@ -38,6 +38,7 @@ export function ExerciseEngine({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [score, setScore] = useState(0)
   const [error, setError] = useState<string | null>(null)
+  const [isFirstTimePassing, setIsFirstTimePassing] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -49,7 +50,6 @@ export function ExerciseEngine({
       ...prev,
       [currentExercise]: answer,
     }))
-    // Clear error when user selects a new answer
     setError(null)
   }
 
@@ -79,6 +79,63 @@ export function ExerciseEngine({
     return Math.round((correct / exercises.length) * 100)
   }
 
+  const updateUserXPAndStreak = async (xpReward: number) => {
+    const { data: currentProfile, error: profileFetchError } = await supabase
+      .from("profiles")
+      .select("total_xp, current_streak, longest_streak, last_activity_date")
+      .eq("id", userId)
+      .single()
+
+    if (profileFetchError) {
+      console.error("Profile fetch error:", profileFetchError)
+      throw new Error("Failed to fetch user profile")
+    }
+
+    if (!currentProfile) {
+      throw new Error("User profile not found")
+    }
+
+    const newXP = (currentProfile.total_xp || 0) + xpReward
+    const today = new Date().toISOString().split("T")[0]
+    const lastActivity = currentProfile.last_activity_date
+
+    let newStreak = currentProfile.current_streak || 0
+    
+    if (lastActivity) {
+      const lastDate = new Date(lastActivity)
+      const todayDate = new Date(today)
+      const diffDays = Math.floor((todayDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24))
+
+      if (diffDays === 1) {
+        newStreak += 1
+      } else if (diffDays > 1) {
+        newStreak = 1
+      }
+    } else {
+      newStreak = 1
+    }
+
+    const profileUpdate = {
+      total_xp: newXP,
+      current_streak: newStreak,
+      longest_streak: Math.max(newStreak, currentProfile.longest_streak || 0),
+      last_activity_date: today,
+      updated_at: new Date().toISOString(),
+    }
+
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .update(profileUpdate)
+      .eq("id", userId)
+
+    if (profileError) {
+      console.error("Profile update error:", profileError)
+      throw new Error("Failed to update user profile")
+    }
+
+    return { newXP, newStreak }
+  }
+
   const handleSubmitExercises = async () => {
     setIsSubmitting(true)
     setError(null)
@@ -88,14 +145,31 @@ export function ExerciseEngine({
     try {
       console.log("Submitting exercises for user:", userId, "lesson:", lesson.id)
 
+      const wasPreviouslyCompleted = userProgress?.completed || false
+      const wasXpAlreadyAwarded = userProgress?.xp_awarded || false
+      const isPassingScore = finalScore >= 70
+      
+      // Award XP if: passing score AND XP wasn't awarded before
+      const shouldAwardXP = isPassingScore && !wasXpAlreadyAwarded
+      setIsFirstTimePassing(shouldAwardXP)
+
+      console.log("XP Awarding Logic:", {
+        wasPreviouslyCompleted,
+        wasXpAlreadyAwarded,
+        isPassingScore,
+        shouldAwardXP,
+        finalScore
+      })
+
       // First, save the lesson progress
       const progressData = {
         user_id: userId,
         lesson_id: lesson.id,
-        completed: finalScore >= 70,
+        completed: isPassingScore,
         score: finalScore,
         attempts: (userProgress?.attempts || 0) + 1,
-        completed_at: finalScore >= 70 ? new Date().toISOString() : null,
+        completed_at: isPassingScore ? new Date().toISOString() : userProgress?.completed_at,
+        xp_awarded: wasXpAlreadyAwarded || shouldAwardXP, // Mark as awarded if we're about to give it
         updated_at: new Date().toISOString(),
       }
 
@@ -114,62 +188,15 @@ export function ExerciseEngine({
 
       console.log("Progress saved successfully")
 
-      // Update user profile with XP and streak only if they passed
-      if (finalScore >= 70) {
-        console.log("User passed, updating profile with XP...")
-        
-        const { data: currentProfile, error: profileFetchError } = await supabase
-          .from("profiles")
-          .select("total_xp, current_streak, longest_streak, last_activity_date")
-          .eq("id", userId)
-          .single()
-
-        if (profileFetchError) {
-          console.error("Profile fetch error:", profileFetchError)
-          console.log("Continuing without profile update...")
-        } else if (currentProfile) {
-          const newXP = (currentProfile.total_xp || 0) + lesson.xp_reward
-          const today = new Date().toISOString().split("T")[0]
-          const lastActivity = currentProfile.last_activity_date
-
-          let newStreak = currentProfile.current_streak || 0
-          
-          if (lastActivity) {
-            const lastDate = new Date(lastActivity)
-            const todayDate = new Date(today)
-            const diffDays = Math.floor((todayDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24))
-
-            if (diffDays === 1) {
-              newStreak += 1
-            } else if (diffDays > 1) {
-              newStreak = 1
-            }
-          } else {
-            newStreak = 1
-          }
-
-          const profileUpdate = {
-            total_xp: newXP,
-            current_streak: newStreak,
-            longest_streak: Math.max(newStreak, currentProfile.longest_streak || 0),
-            last_activity_date: today,
-            updated_at: new Date().toISOString(),
-          }
-
-          console.log("Updating profile with:", profileUpdate)
-
-          const { error: profileError } = await supabase
-            .from("profiles")
-            .update(profileUpdate)
-            .eq("id", userId)
-
-          if (profileError) {
-            console.error("Profile update error:", profileError)
-            console.log("Profile update failed but lesson completion succeeded")
-          } else {
-            console.log("Profile updated successfully")
-          }
-        }
+      // Award XP if eligible
+      if (shouldAwardXP) {
+        console.log("Awarding XP for first-time completion!")
+        await updateUserXPAndStreak(lesson.xp_reward)
+        console.log("XP awarded successfully!")
+      } else if (isPassingScore) {
+        console.log("User passed but XP was already awarded previously.")
+      } else {
+        console.log("User did not pass (score < 70). No XP awarded.")
       }
 
       setShowResults(true)
@@ -216,6 +243,8 @@ export function ExerciseEngine({
         allLessons={allLessons}
         trackId={trackId}
         moduleId={moduleId}
+        // Only pass the props that ExerciseResults expects
+        // Remove userProgress and isFirstTimePassing if they're not in the interface
       />
     )
   }
@@ -323,6 +352,16 @@ export function ExerciseEngine({
           )}
         </Button>
       </div>
+
+      {/* Show XP Award Message */}
+      {isFirstTimePassing && score >= 70 && (
+        <div className="fixed bottom-4 right-4 bg-green-500 text-white p-4 rounded-lg shadow-lg">
+          <div className="flex items-center space-x-2">
+            <CheckCircle className="h-5 w-5" />
+            <span>+{lesson.xp_reward} XP Awarded! 🎉</span>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
