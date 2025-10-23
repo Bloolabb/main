@@ -59,6 +59,7 @@
     "react-hook-form": "^7.60.0",
     "react-resizable-panels": "^2.1.7",
     "recharts": "2.15.4",
+    "sharp": "^0.34.4",
     "sonner": "latest",
     "svelte": "latest",
     "tailwind-merge": "^2.5.5",
@@ -79,4 +80,3 @@
     "typescript": "^5"
   }
 }
-
