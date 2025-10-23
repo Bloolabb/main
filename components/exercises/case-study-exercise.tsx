@@ -6,9 +6,10 @@ interface CaseStudyExerciseProps {
   exercise: any
   selectedAnswer: string
   onAnswer: (answer: string) => void
+  error?: string // Add this line
 }
 
-export function CaseStudyExercise({ exercise, selectedAnswer, onAnswer }: CaseStudyExerciseProps) {
+export function CaseStudyExercise({ exercise, selectedAnswer, onAnswer, error }: CaseStudyExerciseProps) {
   // Fix: Handle both stringified JSON and regular arrays
   const getOptions = () => {
     if (!exercise.options) return []
@@ -37,6 +38,15 @@ export function CaseStudyExercise({ exercise, selectedAnswer, onAnswer }: CaseSt
 
   return (
     <div className="space-y-6">
+      {/* Error Alert */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="text-red-800 text-sm">
+            <strong>Error:</strong> {error}
+          </div>
+        </div>
+      )}
+
       <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-lg border border-purple-200">
         <h3 className="text-lg font-semibold text-purple-800 mb-3">Case Study</h3>
         <div className="text-gray-700 leading-relaxed">{exercise.question}</div>
@@ -55,6 +65,7 @@ export function CaseStudyExercise({ exercise, selectedAnswer, onAnswer }: CaseSt
                   ? "bg-purple-500 hover:bg-purple-600 text-white border-purple-500"
                   : "bg-white hover:bg-gray-50 text-gray-800 border-2 border-gray-200 hover:border-purple-300"
               }`}
+              disabled={!!error} // Disable buttons when there's an error
             >
               <div className="flex items-center space-x-3">
                 <div
@@ -71,7 +82,7 @@ export function CaseStudyExercise({ exercise, selectedAnswer, onAnswer }: CaseSt
         </div>
       </div>
 
-      {exercise.explanation && selectedAnswer && (
+      {exercise.explanation && selectedAnswer && !error && (
         <div className="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
           <div className="text-sm text-purple-800">
             <strong>Analysis:</strong> {exercise.explanation}
