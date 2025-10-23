@@ -9,7 +9,31 @@ interface CaseStudyExerciseProps {
 }
 
 export function CaseStudyExercise({ exercise, selectedAnswer, onAnswer }: CaseStudyExerciseProps) {
-  const options = exercise.options ? JSON.parse(exercise.options) : []
+  // Fix: Handle both stringified JSON and regular arrays
+  const getOptions = () => {
+    if (!exercise.options) return []
+    
+    try {
+      // If it's already an array, return it
+      if (Array.isArray(exercise.options)) {
+        return exercise.options
+      }
+      
+      // If it's a string, try to parse it
+      if (typeof exercise.options === 'string') {
+        // Remove extra escaping if present
+        const cleanString = exercise.options.replace(/\\"/g, '"')
+        return JSON.parse(cleanString)
+      }
+      
+      return []
+    } catch (error) {
+      console.error('Error parsing options:', error)
+      return []
+    }
+  }
+
+  const options = getOptions()
 
   return (
     <div className="space-y-6">
