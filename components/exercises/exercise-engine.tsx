@@ -37,6 +37,7 @@ export function ExerciseEngine({
   const [showResults, setShowResults] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [score, setScore] = useState(0)
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
   const supabase = createClient()
 
@@ -48,6 +49,8 @@ export function ExerciseEngine({
       ...prev,
       [currentExercise]: answer,
     }))
+    // Clear error when user selects a new answer
+    setError(null)
   }
 
   const handleNext = () => {
@@ -78,43 +81,59 @@ export function ExerciseEngine({
 
   const handleSubmitExercises = async () => {
     setIsSubmitting(true)
+    setError(null)
     const finalScore = calculateScore()
     setScore(finalScore)
 
     try {
-      const { error: progressError } = await supabase.from("user_progress").upsert({
+      console.log("Submitting exercises for user:", userId, "lesson:", lesson.id)
+
+      // First, save the lesson progress
+      const progressData = {
         user_id: userId,
         lesson_id: lesson.id,
         completed: finalScore >= 70,
         score: finalScore,
         attempts: (userProgress?.attempts || 0) + 1,
         completed_at: finalScore >= 70 ? new Date().toISOString() : null,
-      })
-
-      if (progressError) {
-        console.error("Progress error:", progressError)
-        throw new Error("Failed to save progress")
+        updated_at: new Date().toISOString(),
       }
 
-      // Update user profile with XP and streak
+      console.log("Progress data:", progressData)
+
+      const { error: progressError } = await supabase
+        .from("user_progress")
+        .upsert(progressData, {
+          onConflict: 'user_id,lesson_id'
+        })
+
+      if (progressError) {
+        console.error("Progress error details:", progressError)
+        throw new Error(`Failed to save progress: ${progressError.message}`)
+      }
+
+      console.log("Progress saved successfully")
+
+      // Update user profile with XP and streak only if they passed
       if (finalScore >= 70) {
+        console.log("User passed, updating profile with XP...")
+        
         const { data: currentProfile, error: profileFetchError } = await supabase
           .from("profiles")
-          .select("*")
+          .select("total_xp, current_streak, longest_streak, last_activity_date")
           .eq("id", userId)
           .single()
 
         if (profileFetchError) {
           console.error("Profile fetch error:", profileFetchError)
-          throw new Error("Failed to fetch profile")
-        }
-
-        if (currentProfile) {
-          const newXP = currentProfile.total_xp + lesson.xp_reward
+          console.log("Continuing without profile update...")
+        } else if (currentProfile) {
+          const newXP = (currentProfile.total_xp || 0) + lesson.xp_reward
           const today = new Date().toISOString().split("T")[0]
           const lastActivity = currentProfile.last_activity_date
 
           let newStreak = currentProfile.current_streak || 0
+          
           if (lastActivity) {
             const lastDate = new Date(lastActivity)
             const todayDate = new Date(today)
@@ -129,28 +148,34 @@ export function ExerciseEngine({
             newStreak = 1
           }
 
+          const profileUpdate = {
+            total_xp: newXP,
+            current_streak: newStreak,
+            longest_streak: Math.max(newStreak, currentProfile.longest_streak || 0),
+            last_activity_date: today,
+            updated_at: new Date().toISOString(),
+          }
+
+          console.log("Updating profile with:", profileUpdate)
+
           const { error: profileError } = await supabase
             .from("profiles")
-            .update({
-              total_xp: newXP,
-              current_streak: newStreak,
-              longest_streak: Math.max(newStreak, currentProfile.longest_streak || 0),
-              last_activity_date: today,
-              updated_at: new Date().toISOString(),
-            })
+            .update(profileUpdate)
             .eq("id", userId)
 
           if (profileError) {
             console.error("Profile update error:", profileError)
-            // Don't throw here as the lesson completion was successful
+            console.log("Profile update failed but lesson completion succeeded")
+          } else {
+            console.log("Profile updated successfully")
           }
         }
       }
 
       setShowResults(true)
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting exercises:", error)
-      alert("There was an error saving your progress. Please try again.")
+      setError(error.message || "There was an error saving your progress. Please try again.")
     } finally {
       setIsSubmitting(false)
     }
@@ -249,6 +274,7 @@ export function ExerciseEngine({
                   exercise={currentExerciseData}
                   selectedAnswer={answers[currentExercise]}
                   onAnswer={handleAnswer}
+                  error={error || undefined}
                 />
               )}
             </>
@@ -284,7 +310,12 @@ export function ExerciseEngine({
           disabled={!answers[currentExercise] || isSubmitting}
           className="flex items-center space-x-2 bg-blue-500 hover:bg-blue-600"
         >
-          <span>{currentExercise === exercises.length - 1 ? "Submit Exercises" : "Next"}</span>
+          <span>
+            {currentExercise === exercises.length - 1 
+              ? (isSubmitting ? "Submitting..." : "Submit Exercises") 
+              : "Next"
+            }
+          </span>
           {currentExercise === exercises.length - 1 ? (
             <CheckCircle className="h-4 w-4" />
           ) : (
