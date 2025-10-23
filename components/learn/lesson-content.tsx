@@ -31,16 +31,19 @@ export function LessonContent({ lesson, userProgress, allLessons, trackId, modul
       type: "intro",
       title: "Lesson Introduction",
       content: `Welcome to "${lesson.title}"! ${lesson.description || "Let's dive into this exciting topic."}`,
+      videoUrl: null,
     },
     {
       type: "content",
       title: lesson.title,
       content: generateLessonContent(lesson),
+      videoUrl: lesson.youtube_url || null, // Add YouTube URL here
     },
     {
       type: "summary",
       title: "Lesson Summary",
       content: `Great job completing "${lesson.title}"! You've earned ${lesson.xp_reward} XP. Ready to test your knowledge?`,
+      videoUrl: null,
     },
   ]
 
@@ -96,7 +99,14 @@ export function LessonContent({ lesson, userProgress, allLessons, trackId, modul
         </CardHeader>
         <CardContent className="p-8">
           <div className="prose prose-lg max-w-none">
-            <div className="text-gray-700 leading-relaxed whitespace-pre-line">{lessonSteps[currentStep].content}</div>
+            {/* YouTube Video - Only show on content step if video exists */}
+            {currentStep === 1 && lessonSteps[currentStep].videoUrl && (
+              <YouTubeVideo url={lessonSteps[currentStep].videoUrl} />
+            )}
+            
+            <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+              {lessonSteps[currentStep].content}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -156,6 +166,42 @@ export function LessonContent({ lesson, userProgress, allLessons, trackId, modul
           )}
         </div>
       )}
+    </div>
+  )
+}
+
+// YouTube Video Component
+function YouTubeVideo({ url }: { url: string }) {
+  return (
+    <div className="mb-6">
+      <div className="video-container">
+        <iframe
+          src={url}
+          title="YouTube video player"
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          className="w-full h-full rounded-lg"
+        ></iframe>
+      </div>
+      <style jsx>{`
+        .video-container {
+          position: relative;
+          padding-bottom: 56.25%; /* 16:9 aspect ratio */
+          height: 0;
+          overflow: hidden;
+          border-radius: 0.5rem;
+          background: #000;
+        }
+        .video-container iframe {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          border-radius: 0.5rem;
+        }
+      `}</style>
     </div>
   )
 }
