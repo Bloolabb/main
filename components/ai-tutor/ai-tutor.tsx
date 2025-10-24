@@ -5,13 +5,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Send, Bot, User, Sparkles, Plus, Lightbulb, Heart, Zap, Crown } from "lucide-react"
+import { Send, Bot, User, Sparkles, Plus, Lightbulb, Heart, Zap, Crown, Shield, AlertTriangle } from "lucide-react"
 
 interface Message {
   id: string
   content: string
   role: "user" | "assistant"
   timestamp: Date
+  isError?: boolean
 }
 
 interface HeartsData {
@@ -37,6 +38,7 @@ export function AITutors() {
   const [isLoading, setIsLoading] = useState(false)
   const [hearts, setHearts] = useState<HeartsData>({ heartsRemaining: 5, totalQuestions: 0, resetDate: '' })
   const [conversationId, setConversationId] = useState<string | null>(null)
+  const [securityWarning, setSecurityWarning] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Load hearts on component mount
@@ -61,14 +63,41 @@ export function AITutors() {
       }
     } catch (error) {
       console.error('Failed to load hearts:', error)
-      // Set default hearts if API fails
       setHearts({ heartsRemaining: 5, totalQuestions: 0, resetDate: new Date().toISOString().split('T')[0] })
     }
+  }
+
+  const validateInput = (text: string): { valid: boolean; warning?: string } => {
+    if (text.length > 500) {
+      return { valid: false, warning: "Questions should be under 500 characters" }
+    }
+    
+    const suspiciousPatterns = [
+      /password|credit.card|social.security/gi,
+      /http[s]?:\/\//gi,
+      /<script|javascript:/gi
+    ]
+    
+    for (const pattern of suspiciousPatterns) {
+      if (pattern.test(text)) {
+        return { valid: false, warning: "Please ask a learning-focused question" }
+      }
+    }
+    
+    return { valid: true }
   }
 
   const handleSend = async (question?: string) => {
     const messageContent = question || input
     if (!messageContent.trim()) return
+
+    // Validate input
+    const validation = validateInput(messageContent)
+    if (!validation.valid) {
+      setSecurityWarning(validation.warning || "Invalid input")
+      setTimeout(() => setSecurityWarning(null), 5000)
+      return
+    }
 
     // Check hearts
     if (hearts.heartsRemaining <= 0) {
@@ -104,6 +133,8 @@ export function AITutors() {
         if (data.error === 'out_of_hearts') {
           setHearts(prev => ({ ...prev, heartsRemaining: 0 }))
           throw new Error(data.message)
+        } else if (data.error === 'content_moderated') {
+          throw new Error("Please ask a learning-focused question about AI, business, or technology.")
         }
         throw new Error(data.error || 'Failed to get AI response')
       }
@@ -129,9 +160,14 @@ export function AITutors() {
     } catch (error) {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: `🤖 **AI Tutor Says:**\n\nI'm here to help you learn! Let me answer your question about "${messageContent}"...\n\n${error instanceof Error ? error.message : 'Something went wrong. Please try again!'}`,
+        content: `${
+          error instanceof Error && error.message.includes('learning-focused') 
+            ? '🚫 ' + error.message
+            : `🤖 **AI Tutor Says:**\n\nI'm here to help you learn! Let me answer your question about "${messageContent}"...\n\n${error instanceof Error ? error.message : 'Something went wrong. Please try again!'}`
+        }`,
         role: "assistant",
-        timestamp: new Date()
+        timestamp: new Date(),
+        isError: true
       }
       setMessages(prev => [...prev, errorMessage])
     } finally {
@@ -143,6 +179,7 @@ export function AITutors() {
     setMessages([])
     setInput("")
     setConversationId(null)
+    setSecurityWarning(null)
   }
 
   const hasHearts = hearts.heartsRemaining > 0
@@ -156,9 +193,10 @@ export function AITutors() {
             <Sparkles className="h-6 w-6" />
             AI Learning Buddy
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground flex items-center gap-2">
+            <Shield className="h-4 w-4 text-green-500" />
             {hasHearts 
-              ? `Ask me anything! Real AI answers await!` 
+              ? `Safe learning environment • ${hearts.heartsRemaining} hearts left` 
               : "Come back tomorrow for more learning! 💫"
             }
           </p>
@@ -175,6 +213,16 @@ export function AITutors() {
           </Button>
         </div>
       </div>
+
+      {/* Security Warning */}
+      {securityWarning && (
+        <Card className="border-2 border-yellow-200 bg-yellow-50">
+          <CardContent className="p-4 flex items-center gap-3">
+            <AlertTriangle className="h-5 w-5 text-yellow-600" />
+            <span className="text-yellow-800 text-sm">{securityWarning}</span>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Hearts System */}
       <Card className="border-2 border-pink-200 bg-pink-50">
@@ -263,7 +311,11 @@ export function AITutors() {
                 handleSend()
               }
             }}
+            maxLength={500}
           />
+          <div className="absolute right-20 top-1/2 transform -translate-y-1/2 text-xs text-muted-foreground">
+            {input.length}/500
+          </div>
           <Button
             onClick={() => handleSend()}
             disabled={isLoading || !input.trim() || !hasHearts}
@@ -290,24 +342,30 @@ export function AITutors() {
             className={`border transition-all duration-200 hover:shadow-sm ${
               message.role === "user" 
                 ? "border-blue-200 bg-blue-50/50" 
+                : message.isError
+                ? "border-yellow-200 bg-yellow-50/50"
                 : "border-green-200 bg-green-50/50"
             }`}
           >
             <CardContent className="p-6">
               <div className="flex items-start gap-4">
-                <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
+                <div className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
                   message.role === "user" 
                     ? "bg-blue-500 text-white" 
+                    : message.isError
+                    ? "bg-yellow-500 text-white"
                     : "bg-green-500 text-white"
                 }`}>
                   {message.role === "user" ? <User className="h-5 w-5" /> : <Bot className="h-5 w-5" />}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="whitespace-pre-wrap leading-relaxed text-gray-700">
+                  <div className={`whitespace-pre-wrap leading-relaxed ${
+                    message.isError ? "text-yellow-800" : "text-gray-700"
+                  }`}>
                     {message.content}
                   </div>
                   <div className="text-xs text-muted-foreground mt-3 flex items-center gap-2">
-                    <span>{message.role === "user" ? "You" : "AI Tutor"}</span>
+                    <span>{message.role === "user" ? "You" : message.isError ? "Notice" : "AI Tutor"}</span>
                     <span>•</span>
                     <span>{message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                   </div>
@@ -321,7 +379,7 @@ export function AITutors() {
           <Card className="border border-green-200 bg-green-50/50">
             <CardContent className="p-6">
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center">
                   <Bot className="h-5 w-5" />
                 </div>
                 <div className="flex-1">

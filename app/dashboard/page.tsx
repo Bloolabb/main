@@ -44,7 +44,7 @@ export default async function DashboardPage() {
     <DashboardLayout user={data.user} profile={profile}>
       <div className="space-y-8">
         {/* Header Section */}
-        <div className="bg-gradient-to-r from-[#6A0DAD] to-[#004AAD] rounded-2xl p-6 text-white shadow-lg">
+        <div className="bg-linear-to-r from-[#6A0DAD] to-[#004AAD] rounded-2xl p-6 text-white shadow-lg">
           <div className="flex flex-col md:flex-row items-start justify-between">
             <div className="flex-1">
               <h1 className="text-3xl font-bold">Welcome back, {profile?.display_name || "Learner"}! 👋</h1>

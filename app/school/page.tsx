@@ -50,6 +50,8 @@ export default function SchoolsPage() {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
   const [activeTab, setActiveTab] = useState("curriculum");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
 
   const handleRegistration = (planType: string) => {
     setSelectedPlan(planType);
@@ -193,7 +195,7 @@ export default function SchoolsPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-6 bg-gradient-to-br from-primary/5 to-secondary/10">
+      <section className="pt-32 pb-20 px-6 bg-linear-to-br from-primary/5 to-secondary/10">
         <div className="container mx-auto max-w-6xl">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
@@ -382,15 +384,15 @@ export default function SchoolsPage() {
                   <h4 className="text-lg font-semibold mb-4">International Standards</h4>
                   <ul className="space-y-3">
                     <li className="flex items-start">
-                      <Check className="w-5 h-5 text-primary mr-2 mt-0.5 flex-shrink-0" />
+                      <Check className="w-5 h-5 text-primary mr-2 mt-0.5 shrink-0" />
                       <span>ISTE Standards for Students</span>
                     </li>
                     <li className="flex items-start">
-                      <Check className="w-5 h-5 text-primary mr-2 mt-0.5 flex-shrink-0" />
+                      <Check className="w-5 h-5 text-primary mr-2 mt-0.5 shrink-0" />
                       <span>UN Sustainable Development Goals</span>
                     </li>
                     <li className="flex items-start">
-                      <Check className="w-5 h-5 text-primary mr-2 mt-0.5 flex-shrink-0" />
+                      <Check className="w-5 h-5 text-primary mr-2 mt-0.5 shrink-0" />
                       <span>P21 Framework for 21st Century Learning</span>
                     </li>
                   </ul>
@@ -399,15 +401,15 @@ export default function SchoolsPage() {
                   <h4 className="text-lg font-semibold mb-4">Regional Standards</h4>
                   <ul className="space-y-3">
                     <li className="flex items-start">
-                      <Check className="w-5 h-5 text-primary mr-2 mt-0.5 flex-shrink-0" />
+                      <Check className="w-5 h-5 text-primary mr-2 mt-0.5 shrink-0" />
                       <span>World Education Standards</span>
                     </li>
                     <li className="flex items-start">
-                      <Check className="w-5 h-5 text-primary mr-2 mt-0.5 flex-shrink-0" />
+                      <Check className="w-5 h-5 text-primary mr-2 mt-0.5 shrink-0" />
                       <span>GCC Common Curriculum Framework</span>
                     </li>
                     <li className="flex items-start">
-                      <Check className="w-5 h-5 text-primary mr-2 mt-0.5 flex-shrink-0" />
+                      <Check className="w-5 h-5 text-primary mr-2 mt-0.5 shrink-0" />
                       <span>Custom alignment available for your region</span>
                     </li>
                   </ul>
@@ -496,7 +498,7 @@ export default function SchoolsPage() {
                   <ul className="space-y-3 mb-8">
                     {plan.features.map((feature, i) => (
                       <li key={i} className="flex items-start">
-                        <Check className="w-5 h-5 text-primary mr-2 mt-0.5 flex-shrink-0" />
+                        <Check className="w-5 h-5 text-primary mr-2 mt-0.5 shrink-0" />
                         <span>{feature}</span>
                       </li>
                     ))}
@@ -563,7 +565,7 @@ export default function SchoolsPage() {
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-20 px-6 bg-gradient-to-br from-background via-primary/5 to-accent/10">
+      <section id="contact" className="py-20 px-6 bg-linear-to-br from-background via-primary/5 to-accent/10">
   <div className="container mx-auto max-w-6xl">
     <div className="text-center mb-16">
       <Badge variant="outline" className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-semibold mb-4">
@@ -577,8 +579,8 @@ export default function SchoolsPage() {
     </div>
     
     <div className="grid lg:grid-cols-2 gap-12 items-start">
-      {/* Contact Form */}
-      {/* <div className="relative">
+      {/*Contact Form */}
+      <div className="relative">
         <div className="absolute -inset-3 bg-gradient-primary rounded-2xl opacity-20 blur-md"></div>
         <Card className="relative bg-background/80 backdrop-blur-sm border-border/50 p-8 shadow-glow">
           <CardHeader className="text-center pb-6">
@@ -593,26 +595,71 @@ export default function SchoolsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form className="space-y-5">
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              setIsSubmitting(true);
+              setSubmissionError(null);
+
+              const formData = new FormData(e.currentTarget);
+              const data = {
+                firstName: formData.get('firstName'),
+                lastName: formData.get('lastName'),
+                email: formData.get('email'),
+                school: formData.get('school'),
+                role: formData.get('role'),
+                students: formData.get('students'),
+                message: formData.get('message')
+              };
+
+              try {
+                const response = await fetch('/api/schools/demo-request', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                  const error = await response.json();
+                  throw new Error(error.message || 'Failed to submit demo request');
+                }
+
+                // Reset form
+                e.currentTarget.reset();
+
+                // Show success message (you can replace this with a toast notification)
+                alert('Thank you! Our team will contact you shortly.');
+
+              } catch (error) {
+                setSubmissionError(error instanceof Error ? error.message : 'Something went wrong');
+              } finally {
+                setIsSubmitting(false);
+              }
+            }} className="space-y-5">
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label htmlFor="firstName" className="text-sm font-medium text-foreground/80">First Name *</label>
                   <input 
                     type="text" 
+                    name="firstName"
                     id="firstName" 
                     className="w-full p-3.5 rounded-xl bg-muted/50 text-foreground border border-border focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
                     required 
                     placeholder="Enter your first name"
+                    disabled={isSubmitting}
                   />
                 </div>
                 <div className="space-y-2">
                   <label htmlFor="lastName" className="text-sm font-medium text-foreground/80">Last Name *</label>
                   <input 
                     type="text" 
+                    name="lastName"
                     id="lastName" 
                     className="w-full p-3.5 rounded-xl bg-muted/50 text-foreground border border-border focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
                     required 
                     placeholder="Enter your last name"
+                    disabled={isSubmitting}
                   />
                 </div>
               </div>
@@ -620,31 +667,37 @@ export default function SchoolsPage() {
               <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-medium text-foreground/80">Email Address *</label>
                 <input 
-                  type="email" 
+                  type="email"
+                  name="email" 
                   id="email" 
                   className="w-full p-3.5 rounded-xl bg-muted/50 text-foreground border border-border focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
                   required 
                   placeholder="your.email@school.edu"
+                  disabled={isSubmitting}
                 />
               </div>
               
               <div className="space-y-2">
                 <label htmlFor="school" className="text-sm font-medium text-foreground/80">School Name *</label>
                 <input 
-                  type="text" 
+                  type="text"
+                  name="school" 
                   id="school" 
                   className="w-full p-3.5 rounded-xl bg-muted/50 text-foreground border border-border focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
                   required 
                   placeholder="Enter your school name"
+                  disabled={isSubmitting}
                 />
               </div>
               
               <div className="space-y-2">
                 <label htmlFor="role" className="text-sm font-medium text-foreground/80">Your Role *</label>
                 <select 
+                  name="role"
                   id="role" 
                   className="w-full p-3.5 rounded-xl bg-muted/50 text-foreground border border-border focus:ring-2 focus:ring-primary focus:border-transparent transition-all appearance-none" 
                   required
+                  disabled={isSubmitting}
                 >
                   <option value="">Select your role</option>
                   <option value="teacher">Teacher</option>
@@ -659,8 +712,10 @@ export default function SchoolsPage() {
               <div className="space-y-2">
                 <label htmlFor="students" className="text-sm font-medium text-foreground/80">Number of Students</label>
                 <select 
+                  name="students"
                   id="students" 
                   className="w-full p-3.5 rounded-xl bg-muted/50 text-foreground border border-border focus:ring-2 focus:ring-primary focus:border-transparent transition-all appearance-none" 
+                  disabled={isSubmitting}
                 >
                   <option value="">Select range</option>
                   <option value="1-100">1-100 students</option>
@@ -674,24 +729,42 @@ export default function SchoolsPage() {
               <div className="space-y-2">
                 <label htmlFor="message" className="text-sm font-medium text-foreground/80">Message (Optional)</label>
                 <textarea 
+                  name="message"
                   id="message" 
                   rows={4} 
                   className="w-full p-3.5 rounded-xl bg-muted/50 text-foreground border border-border focus:ring-2 focus:ring-primary focus:border-transparent transition-all" 
                   placeholder="Tell us about your specific needs or questions..."
+                  disabled={isSubmitting}
                 ></textarea>
               </div>
+
+              {submissionError && (
+                <div className="p-3 text-sm text-red-500 bg-red-100 rounded-lg">
+                  {submissionError}
+                </div>
+              )}
               
               <Button 
                 type="submit" 
                 className="w-full bg-gradient-primary hover:bg-gradient-secondary text-primary-foreground font-semibold py-4 rounded-xl transition-all transform hover:scale-[1.02] shadow-md hover:shadow-lg"
+                disabled={isSubmitting}
               >
-                <Rocket className="w-5 h-5 mr-2" />
-                Request Demo
+                {isSubmitting ? (
+                  <div className="flex items-center justify-center">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    Submitting...
+                  </div>
+                ) : (
+                  <>
+                    <Rocket className="w-5 h-5 mr-2" />
+                    Request Demo
+                  </>
+                )}
               </Button>
             </form>
           </CardContent>
         </Card>
-      </div> */}
+      </div>
       
       {/* Contact Information */}
       <div className="space-y-8">
@@ -699,7 +772,7 @@ export default function SchoolsPage() {
         <div className="grid md:grid-cols-2 gap-6">
           <Card className="bg-card border-border/50 p-5 hover:shadow-glow transition-smooth">
             <CardContent className="p-0 flex items-start">
-              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary mr-4 flex-shrink-0">
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary mr-4 shrink-0">
                 <Mail className="w-6 h-6" />
               </div>
               <div>
@@ -712,7 +785,7 @@ export default function SchoolsPage() {
           
           <Card className="bg-card border-border/50 p-5 hover:shadow-glow transition-smooth">
             <CardContent className="p-0 flex items-start">
-              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary mr-4 flex-shrink-0">
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary mr-4 shrink-0">
                 <Phone className="w-6 h-6" />
               </div>
               <div>
@@ -727,7 +800,7 @@ export default function SchoolsPage() {
         {/* Location Card */}
         <Card className="bg-card border-border/50 p-5 hover:shadow-glow transition-smooth">
           <CardContent className="p-0 flex items-start">
-            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary mr-4 flex-shrink-0">
+            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-primary mr-4 shrink-0">
               <MapPin className="w-6 h-6" />
             </div>
             <div>

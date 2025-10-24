@@ -15,6 +15,7 @@ export default function SignUpPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [displayName, setDisplayName] = useState("")
+  const [dateOfBirth, setDateOfBirth] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -38,6 +39,21 @@ export default function SignUpPage() {
       return
     }
 
+    // Calculate age and validate
+    const birthDate = new Date(dateOfBirth)
+    const today = new Date()
+    let age = today.getFullYear() - birthDate.getFullYear()
+    const monthDiff = today.getMonth() - birthDate.getMonth()
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--
+    }
+
+    if (age < 13) {
+      setError("You must be at least 13 years old to sign up")
+      setIsLoading(false)
+      return
+    }
+
     try {
       const { error } = await supabase.auth.signUp({
         email,
@@ -47,6 +63,7 @@ export default function SignUpPage() {
             process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/auth/onboarding`,
           data: {
             display_name: displayName,
+            date_of_birth: dateOfBirth,
           },
         },
       })
@@ -60,7 +77,7 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-liniar-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <Card className="border-2 border-green-200 shadow-xl">
           <CardHeader className="text-center space-y-2">
@@ -83,6 +100,19 @@ export default function SignUpPage() {
                   required
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
+                  className="h-12 border-2 border-gray-200 focus:border-green-400"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="dateOfBirth" className="text-sm font-medium text-gray-700">
+                  Date of Birth
+                </Label>
+                <Input
+                  id="dateOfBirth"
+                  type="date"
+                  required
+                  value={dateOfBirth}
+                  onChange={(e) => setDateOfBirth(e.target.value)}
                   className="h-12 border-2 border-gray-200 focus:border-green-400"
                 />
               </div>

@@ -2,9 +2,17 @@ SUMMARY
 
 This README summarizes the production hardening and fixes applied to the SQL migration and helper scripts in the `scripts/` folder.
 
-What I changed
+Migration Scripts
 
-1. Idempotency and safety
+1. 014_create_demo_requests.sql
+   - Creates school_demo_requests table for managing demo requests from schools
+   - Includes RLS policies for secure access control
+   - Adds realtime pub/sub support
+   - Creates indexes for performance optimization
+
+2. Earlier Migrations & Changes
+
+3. Idempotency and safety
    - Added `DROP POLICY IF EXISTS` before `CREATE POLICY` where appropriate so policies can be re-applied without error.
    - Ensured `ON CONFLICT` or `ON CONFLICT DO NOTHING` on seed inserts where relevant for idempotent seeds.
    - Added `CREATE EXTENSION IF NOT EXISTS pgcrypto;` to ensure `gen_random_uuid()` is available in environments that allow it.
