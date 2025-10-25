@@ -24,9 +24,9 @@ export function DashboardLayout({ children, user, profile }: DashboardLayoutProp
         {/* Sidebar */}
         <Sidebar user={user} profile={profile} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-        {/* Main content - No margin, content goes right next to sidebar */}
+        {/* Main content - Container with 20px padding on sides */}
         <main className="flex-1 p-2 lg:p-4 pt-16 lg:pt-4 min-w-0">
-          <div className="w-full max-w-none">{children}</div>
+          <div className="w-full max-w-none container mx-auto px-5">{children}</div>
         </main>
       </div>
 
