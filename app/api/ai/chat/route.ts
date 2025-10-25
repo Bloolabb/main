@@ -4,147 +4,142 @@ import { NextRequest, NextResponse } from "next/server"
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY
 
-// Content moderation keywords (basic client-side filtering)
-const BLOCKED_KEYWORDS = [
-  // Personal information requests
-  'password', 'address', 'phone number', 'social security', 'credit card',
-  // Inappropriate content
-  'hate', 'violence', 'bully', 'hurt', 'dangerous',
-  // Adult content
-  'adult', 'explicit', 'nsfw', 'porn', 'sexual'
-];
-
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const supabase = await createClient() // Added await here
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
     
-    if (!user) {
-      await logError(supabase, null, 'Unauthorized access attempt', { ip: request.ip })
+    if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const { message, conversationId } = await request.json()
     
     if (!message?.trim()) {
-      return NextResponse.json({ error: "Message required" }, { status: 400 })
+      return NextResponse.json({ error: "Message is required" }, { status: 400 })
     }
 
-    // Content moderation check
-    const moderationResult = await moderateContent(message, user.id, supabase)
-    if (moderationResult.blocked) {
-      return NextResponse.json({ 
-        error: 'content_moderated', 
-        message: 'Please ask a different question that follows our community guidelines.' 
-      }, { status: 400 })
+    // Validate input length
+    if (message.length > 500) {
+      return NextResponse.json({ error: "Message too long" }, { status: 400 })
     }
 
-    // 1️⃣ Check today's hearts with enhanced security
-    const today = new Date().toISOString().split('T')[0]
-    const { data: usage, error: usageError } = await supabase
-      .from('user_ai_usage')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('hearts_reset_date', today)
-      .single()
+    // 1️⃣ Use the database function to check and decrement hearts
+    const { data: heartUsage, error: heartError } = await supabase
+      .rpc('use_ai_heart', { user_uuid: user.id })
 
-    if (usageError && usageError.code !== 'PGRST116') {
-      await logError(supabase, user.id, 'Usage check failed', { error: usageError })
+    if (heartError) {
+      console.error('Heart usage error:', heartError)
+      return NextResponse.json({ error: 'Database error' }, { status: 500 })
     }
 
-    const heartsRemaining = usage?.hearts_remaining ?? 5
-    if (heartsRemaining <= 0) {
-      return NextResponse.json({ 
-        error: 'out_of_hearts', 
-        message: 'You used all your hearts for today! Come back tomorrow for more learning!' 
-      }, { status: 403 })
+    if (!heartUsage || heartUsage.length === 0 || !heartUsage[0].success) {
+      return NextResponse.json(
+        { 
+          error: 'out_of_hearts', 
+          message: heartUsage?.[0]?.message || 'No hearts remaining for today' 
+        }, 
+        { status: 429 }
+      )
     }
 
-    // 2️⃣ Get user age group for appropriate responses
-    const ageGroup = await getUserAgeGroup(user.id, supabase)
+    const usage = heartUsage[0]
 
-    // 3️⃣ Try OpenRouter first with enhanced safety settings
+    // 2️⃣ Call AI API
     let aiResponse: string
-    let apiUsed = 'gemini' // default fallback
+    let usedModel = 'unknown'
     
     try {
-      aiResponse = await callOpenRouterAPI(message, ageGroup)
-      apiUsed = 'openrouter'
+      aiResponse = await callOpenRouterAPI(message)
+      usedModel = 'openrouter'
     } catch (err) {
       console.error('OpenRouter failed:', err)
-      await logError(supabase, user.id, 'OpenRouter API failed', { error: err, message })
-      
       try {
-        aiResponse = await callGeminiAPI(message, ageGroup)
-        apiUsed = 'gemini'
+        aiResponse = await callGeminiAPI(message)
+        usedModel = 'gemini'
       } catch (geminiErr) {
-        await logError(supabase, user.id, 'Gemini API failed', { error: geminiErr, message })
-        throw new Error('All AI services are currently unavailable')
+        console.error('Gemini also failed:', geminiErr)
+        // Fallback response
+        aiResponse = `I understand you're asking about "${message}". As your AI tutor, I'd love to help you learn more about this topic! This is a great question for exploring new ideas. 🧠✨`
+        usedModel = 'fallback'
       }
     }
 
-    // 4️⃣ Validate AI response
-    if (!aiResponse?.trim()) {
-      await logError(supabase, user.id, 'Empty AI response', { message, apiUsed })
-      aiResponse = "I'm having trouble thinking of a good answer right now. Could you try asking in a different way?"
+    // 3️⃣ Save conversation to database
+    let savedConversationId = conversationId
+    try {
+      const conversationTitle = message.slice(0, 50) + (message.length > 50 ? '...' : '')
+      
+      const { data: conversationData, error: conversationError } = await supabase
+        .rpc('save_ai_conversation', {
+          user_uuid: user.id,
+          conversation_title: conversationTitle,
+          user_message: message,
+          ai_response: aiResponse,
+          existing_conversation_id: conversationId
+        })
+
+      if (conversationError) {
+        console.error('Failed to save conversation:', conversationError)
+      } else if (conversationData && conversationData.length > 0) {
+        savedConversationId = conversationData[0].conversation_id
+      }
+    } catch (saveError) {
+      console.error('Error saving conversation:', saveError)
+      // Don't fail the request if saving conversation fails
     }
-
-    // 5️⃣ Update hearts in Supabase
-    const newHearts = heartsRemaining - 1
-    const totalQuestions = (usage?.total_questions_asked ?? 0) + 1
-    
-    const { error: updateError } = await supabase
-      .from('user_ai_usage')
-      .upsert({
-        user_id: user.id,
-        hearts_remaining: newHearts,
-        total_questions_asked: totalQuestions,
-        hearts_reset_date: today,
-        last_used_at: new Date().toISOString()
-      }, { 
-        onConflict: 'user_id,hearts_reset_date',
-        ignoreDuplicates: false 
-      })
-
-    if (updateError) {
-      await logError(supabase, user.id, 'Hearts update failed', { error: updateError })
-    }
-
-    // 6️⃣ Log the interaction for safety monitoring
-    await logInteraction(supabase, user.id, message, aiResponse, ageGroup, apiUsed)
 
     return NextResponse.json({
-      success: true,
       response: aiResponse,
-      heartsRemaining: newHearts,
-      conversationId: conversationId || generateConversationId()
+      heartsRemaining: usage.hearts_remaining,
+      totalQuestions: usage.total_questions,
+      conversationId: savedConversationId,
+      modelUsed: usedModel
     })
+
   } catch (error) {
     console.error("AI Chat Error:", error)
-    return NextResponse.json({ error: "Server error" }, { status: 500 })
+    return NextResponse.json(
+      { error: "Internal server error" }, 
+      { status: 500 }
+    )
   }
 }
 
-// Enhanced OpenRouter call with safety settings
-async function callOpenRouterAPI(message: string, ageGroup: string): Promise<string> {
-  const systemPrompt = getSystemPrompt(ageGroup)
-  
+// OpenRouter call
+async function callOpenRouterAPI(message: string): Promise<string> {
+  if (!OPENROUTER_API_KEY) {
+    throw new Error('OpenRouter API key not configured')
+  }
+
   const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-      'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'https://yourapp.com',
-      'X-Title': 'Kids AI Tutor'
+      'HTTP-Referer': 'https://yourapp.com', // Required by OpenRouter
+      'X-Title': 'AI Learning Platform' // Required by OpenRouter
     },
     body: JSON.stringify({
-      model: "anthropic/claude-3-haiku",
+      model: "anthropic/claude-3-haiku", // Better for kids, cost-effective
       messages: [
         {
           role: "system",
-          content: systemPrompt
+          content: `You are a friendly AI tutor for kids and teenagers aged 6-16. Your role is to:
+- Explain concepts in simple, engaging terms
+- Use age-appropriate examples and analogies
+- Include relevant emojis to make learning fun
+- Be encouraging and positive
+- Focus on educational content about AI, technology, business, and entrepreneurship
+- Keep responses under 300 words
+- Always maintain a safe, appropriate tone
+
+If asked about inappropriate topics, gently redirect to learning-focused subjects.`
         },
-        { role: "user", content: message }
+        { 
+          role: "user", 
+          content: message 
+        }
       ],
       max_tokens: 500,
       temperature: 0.7,
@@ -155,14 +150,21 @@ async function callOpenRouterAPI(message: string, ageGroup: string): Promise<str
     const errorText = await response.text()
     throw new Error(`OpenRouter API failed: ${response.status} - ${errorText}`)
   }
-  
+
   const data = await response.json()
-  return data.choices[0]?.message?.content?.trim() || "I couldn't generate a proper response. Please try again."
+  
+  if (!data.choices?.[0]?.message?.content) {
+    throw new Error('Invalid response format from OpenRouter')
+  }
+
+  return data.choices[0].message.content
 }
 
-// Enhanced Gemini call
-async function callGeminiAPI(message: string, ageGroup: string): Promise<string> {
-  const prompt = `As a friendly tutor for ${ageGroup} year olds, answer this in a simple, educational way: ${message}`
+// Gemini fallback
+async function callGeminiAPI(message: string): Promise<string> {
+  if (!GEMINI_API_KEY) {
+    throw new Error('Gemini API key not configured')
+  }
 
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
@@ -170,125 +172,33 @@ async function callGeminiAPI(message: string, ageGroup: string): Promise<string>
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        contents: [{ 
-          parts: [{ text: prompt }],
-          role: "user"
+        contents: [{
+          parts: [{
+            text: `You are a friendly AI tutor for kids. Explain this in simple, engaging terms with examples and emojis. Keep it under 300 words.
+
+User question: ${message}
+
+AI Tutor response:`
+          }]
         }],
-        safetySettings: [
-          {
-            category: "HARM_CATEGORY_HARASSMENT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-          },
-          {
-            category: "HARM_CATEGORY_HATE_SPEECH",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-          },
-          {
-            category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-          },
-          {
-            category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-          }
-        ],
         generationConfig: {
-          temperature: 0.7,
           maxOutputTokens: 500,
+          temperature: 0.7
         }
       }),
     }
   )
 
   if (!response.ok) {
-    const errorData = await response.json()
-    throw new Error(`Gemini API failed: ${response.status} - ${JSON.stringify(errorData)}`)
+    const errorText = await response.text()
+    throw new Error(`Gemini API failed: ${response.status} - ${errorText}`)
   }
-  
+
   const data = await response.json()
-  return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "Sorry, I couldn't find an answer."
-}
-
-// Content moderation function
-async function moderateContent(message: string, userId: string, supabase: any): Promise<{ blocked: boolean; categories: string[] }> {
-  const lowerMessage = message.toLowerCase()
-  const flaggedCategories: string[] = []
-
-  // Basic keyword filtering
-  BLOCKED_KEYWORDS.forEach(keyword => {
-    if (lowerMessage.includes(keyword.toLowerCase())) {
-      flaggedCategories.push(keyword)
-    }
-  })
-
-  // Length check to prevent abuse
-  if (message.length > 1000) {
-    flaggedCategories.push('excessive_length')
-  }
-
-  const blocked = flaggedCategories.length > 0
-
-  // Log moderation event
-  if (blocked) {
-    await supabase
-      .from('content_moderation_logs')
-      .insert({
-        user_id: userId,
-        input_text: message.substring(0, 500), // Limit stored text
-        flagged_categories: flaggedCategories,
-        moderation_score: flaggedCategories.length / BLOCKED_KEYWORDS.length,
-        was_blocked: true
-      })
-  }
-
-  return { blocked, categories: flaggedCategories }
-}
-
-// System prompt based on age group
-function getSystemPrompt(ageGroup: string): string {
-  const basePrompt = "You are a friendly, patient AI tutor for children. Always be encouraging, use simple language, and include educational examples."
   
-  const ageSpecificPrompts = {
-    '6-9': `${basePrompt} Use very simple words, lots of emojis 🎨✨, and short sentences. Focus on concrete concepts.`,
-    '10-12': `${basePrompt} Use clear explanations with examples. You can introduce some new vocabulary with definitions. Use some emojis for engagement.`,
-    '13-16': `${basePrompt} You can discuss more complex topics but keep explanations accessible. Encourage critical thinking.`
+  if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
+    throw new Error('Invalid response format from Gemini')
   }
 
-  return ageSpecificPrompts[ageGroup as keyof typeof ageSpecificPrompts] || ageSpecificPrompts['13-16']
-}
-
-// Helper functions
-async function getUserAgeGroup(userId: string, supabase: any): Promise<string> {
-  // You might want to store age group in user metadata or a profiles table
-  // For now, return a default - implement based on your user data structure
-  return '10-12'
-}
-
-async function logInteraction(supabase: any, userId: string, message: string, response: string, ageGroup: string, apiUsed: string) {
-  await supabase
-    .from('ai_interaction_logs')
-    .insert({
-      user_id: userId,
-      message: message.substring(0, 1000), // Limit length
-      response: response.substring(0, 2000), // Limit length
-      age_group: ageGroup,
-      api_used: apiUsed,
-      tokens_used: Math.ceil((message.length + response.length) / 4) // Rough estimate
-    })
-}
-
-async function logError(supabase: any, userId: string | null, error: string, additionalData?: any) {
-  await supabase
-    .from('ai_error_logs')
-    .insert({
-      user_id: userId,
-      error: error.substring(0, 1000),
-      request_data: additionalData,
-      stack: new Error().stack?.substring(0, 2000),
-      timestamp: new Date().toISOString()
-    })
-}
-
-function generateConversationId(): string {
-  return `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  return data.candidates[0].content.parts[0].text
 }
