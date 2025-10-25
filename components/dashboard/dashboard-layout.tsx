@@ -24,8 +24,8 @@ export function DashboardLayout({ children, user, profile }: DashboardLayoutProp
         {/* Sidebar */}
         <Sidebar user={user} profile={profile} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-        {/* Main content */}
-        <main className="flex-1 lg:ml-64 p-4 lg:p-8 pt-20 lg:pt-8">
+        {/* Main content - Reduced left margin and padding */}
+        <main className="flex-1 lg:ml-60 p-4 lg:p-6 pt-20 lg:pt-6"> {/* Changed from lg:ml-64 and reduced padding */}
           <div className="max-w-7xl mx-auto">{children}</div>
         </main>
       </div>
