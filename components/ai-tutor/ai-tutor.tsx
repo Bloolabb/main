@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Send, Bot, User, Sparkles, Plus, Lightbulb, Heart, Zap, Crown, Shield, AlertTriangle } from "lucide-react"
+import { Send, Bot, User, Sparkles, Plus, Lightbulb, Heart, Crown, Shield, AlertTriangle } from "lucide-react"
 
 interface Message {
   id: string
@@ -19,6 +19,7 @@ interface HeartsData {
   heartsRemaining: number
   totalQuestions: number
   resetDate: string
+  canAskQuestions: boolean
 }
 
 const suggestedQuestions = [
@@ -36,7 +37,12 @@ export function AITutors() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [hearts, setHearts] = useState<HeartsData>({ heartsRemaining: 5, totalQuestions: 0, resetDate: '' })
+  const [hearts, setHearts] = useState<HeartsData>({ 
+    heartsRemaining: 5, 
+    totalQuestions: 0, 
+    resetDate: '', 
+    canAskQuestions: true 
+  })
   const [conversationId, setConversationId] = useState<string | null>(null)
   const [securityWarning, setSecurityWarning] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -60,10 +66,23 @@ export function AITutors() {
       if (response.ok) {
         const data = await response.json()
         setHearts(data)
+      } else {
+        // If API fails, set default values
+        setHearts({ 
+          heartsRemaining: 5, 
+          totalQuestions: 0, 
+          resetDate: new Date().toISOString().split('T')[0],
+          canAskQuestions: true 
+        })
       }
     } catch (error) {
       console.error('Failed to load hearts:', error)
-      setHearts({ heartsRemaining: 5, totalQuestions: 0, resetDate: new Date().toISOString().split('T')[0] })
+      setHearts({ 
+        heartsRemaining: 5, 
+        totalQuestions: 0, 
+        resetDate: new Date().toISOString().split('T')[0],
+        canAskQuestions: true 
+      })
     }
   }
 
@@ -72,15 +91,20 @@ export function AITutors() {
       return { valid: false, warning: "Questions should be under 500 characters" }
     }
     
+    if (text.trim().length === 0) {
+      return { valid: false, warning: "Please enter a question" }
+    }
+    
     const suspiciousPatterns = [
       /password|credit.card|social.security/gi,
       /http[s]?:\/\//gi,
-      /<script|javascript:/gi
+      /<script|javascript:/gi,
+      /\b(sex|porn|nude|violence|drugs|alcohol)\b/gi
     ]
     
     for (const pattern of suspiciousPatterns) {
       if (pattern.test(text)) {
-        return { valid: false, warning: "Please ask a learning-focused question" }
+        return { valid: false, warning: "Please ask a learning-focused question about AI, business, or technology" }
       }
     }
     
@@ -100,7 +124,9 @@ export function AITutors() {
     }
 
     // Check hearts
-    if (hearts.heartsRemaining <= 0) {
+    if (!hearts.canAskQuestions || hearts.heartsRemaining <= 0) {
+      setSecurityWarning("No hearts remaining for today. Come back tomorrow!")
+      setTimeout(() => setSecurityWarning(null), 5000)
       return
     }
 
@@ -131,10 +157,13 @@ export function AITutors() {
 
       if (!response.ok) {
         if (data.error === 'out_of_hearts') {
-          setHearts(prev => ({ ...prev, heartsRemaining: 0 }))
-          throw new Error(data.message)
-        } else if (data.error === 'content_moderated') {
-          throw new Error("Please ask a learning-focused question about AI, business, or technology.")
+          // Update local state to reflect no hearts remaining
+          setHearts(prev => ({ 
+            ...prev, 
+            heartsRemaining: 0,
+            canAskQuestions: false 
+          }))
+          throw new Error("You've used all your hearts for today! Come back tomorrow for more learning. 🎉")
         }
         throw new Error(data.error || 'Failed to get AI response')
       }
@@ -147,10 +176,13 @@ export function AITutors() {
       }
 
       setMessages(prev => [...prev, aiMessage])
+      
+      // Update hearts from the API response
       setHearts(prev => ({
-        ...prev,
         heartsRemaining: data.heartsRemaining,
-        totalQuestions: prev.totalQuestions + 1
+        totalQuestions: data.totalQuestions,
+        resetDate: prev.resetDate,
+        canAskQuestions: data.heartsRemaining > 0
       }))
       
       if (data.conversationId) {
@@ -160,11 +192,7 @@ export function AITutors() {
     } catch (error) {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: `${
-          error instanceof Error && error.message.includes('learning-focused') 
-            ? '🚫 ' + error.message
-            : `🤖 **AI Tutor Says:**\n\nI'm here to help you learn! Let me answer your question about "${messageContent}"...\n\n${error instanceof Error ? error.message : 'Something went wrong. Please try again!'}`
-        }`,
+        content: error instanceof Error ? error.message : 'Something went wrong. Please try again!',
         role: "assistant",
         timestamp: new Date(),
         isError: true
@@ -182,7 +210,7 @@ export function AITutors() {
     setSecurityWarning(null)
   }
 
-  const hasHearts = hearts.heartsRemaining > 0
+  const hasHearts = hearts.heartsRemaining > 0 && hearts.canAskQuestions
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -233,7 +261,7 @@ export function AITutors() {
                 <Heart className="h-5 w-5 text-pink-500 fill-pink-500" />
                 <span className="font-semibold text-pink-700">Learning Hearts</span>
               </div>
-              <Badge variant="secondary" className="bg-white">
+              <Badge variant="secondary" className="bg-pink-100 text-pink-800">
                 {hearts.heartsRemaining} / 5 today
               </Badge>
             </div>
@@ -255,11 +283,16 @@ export function AITutors() {
               />
             ))}
           </div>
+
+          {/* Reset Info */}
+          <div className="text-xs text-pink-600 mt-2 text-center">
+            Hearts reset daily at midnight
+          </div>
         </CardContent>
       </Card>
 
       {/* Out of Hearts Message */}
-      {!hasHearts && (
+      {!hasHearts && hearts.totalQuestions > 0 && (
         <Card className="border-2 border-green-200 bg-green-50">
           <CardContent className="p-6 text-center">
             <Crown className="h-12 w-12 text-green-500 mx-auto mb-4" />
@@ -399,6 +432,20 @@ export function AITutors() {
         
         <div ref={messagesEndRef} />
       </div>
+
+      {/* First Time User Guide */}
+      {hasHearts && messages.length === 0 && (
+        <Card className="border-2 border-blue-200 bg-blue-50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <Lightbulb className="h-5 w-5 text-blue-500" />
+              <div className="text-sm text-blue-700">
+                <strong>Tip:</strong> You have {hearts.heartsRemaining} hearts today. Each question uses 1 heart. Hearts reset daily!
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }
