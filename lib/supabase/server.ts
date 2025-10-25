@@ -24,3 +24,28 @@ export async function createClient() {
     },
   })
 }
+
+/**
+ * Service role client (server-only). Use this when you need to bypass RLS for server-side operations.
+ * IMPORTANT: Do NOT use in client-side code. The service role key must remain secret.
+ */
+export function createServiceClient() {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('SUPABASE_SERVICE_ROLE_KEY is not set in the environment')
+  }
+
+  // For service operations we don't need cookies/session handling.
+  // Provide a no-op cookies adapter since service client doesn't use session cookies
+  const noopCookies = {
+    getAll() {
+      return []
+    },
+    setAll() {
+      /* no-op */
+    },
+  }
+
+  return createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+    cookies: noopCookies as any,
+  })
+}
