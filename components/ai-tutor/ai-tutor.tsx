@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
@@ -45,20 +45,11 @@ export function AITutors() {
   })
   const [conversationId, setConversationId] = useState<string | null>(null)
   const [securityWarning, setSecurityWarning] = useState<string | null>(null)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Load hearts on component mount
   useEffect(() => {
     loadHearts()
   }, [])
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
 
   const loadHearts = async () => {
     try {
@@ -67,7 +58,6 @@ export function AITutors() {
         const data = await response.json()
         setHearts(data)
       } else {
-        // If API fails, set default values
         setHearts({ 
           heartsRemaining: 5, 
           totalQuestions: 0, 
@@ -157,7 +147,6 @@ export function AITutors() {
 
       if (!response.ok) {
         if (data.error === 'out_of_hearts') {
-          // Update local state to reflect no hearts remaining
           setHearts(prev => ({ 
             ...prev, 
             heartsRemaining: 0,
@@ -177,7 +166,6 @@ export function AITutors() {
 
       setMessages(prev => [...prev, aiMessage])
       
-      // Update hearts from the API response
       setHearts(prev => ({
         heartsRemaining: data.heartsRemaining,
         totalQuestions: data.totalQuestions,
@@ -307,8 +295,60 @@ export function AITutors() {
           </CardContent>
         </Card>
       )}
+      {/* First Time User Guide */}
+      {hasHearts && messages.length === 0 && (
+        <Card className="border-2 border-blue-200 bg-blue-50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <Lightbulb className="h-5 w-5 text-blue-500" />
+              <div className="text-sm text-blue-700">
+                <strong>Tip:</strong> You have {hearts.heartsRemaining} hearts today. Each question uses 1 heart. Hearts reset daily!
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}{/* Chat Input - Moved to top of chat area */}
+      {hasHearts && (
+        <div className="relative">
+          <Input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder={`Ask about AI, business, or technology... (${hearts.heartsRemaining} hearts left)`}
+            className="h-14 text-lg pr-20 border-2 border-primary/20 focus:border-primary transition-colors shadow-sm"
+            onKeyPress={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault()
+                handleSend()
+              }
+            }}
+            maxLength={500}
+          />
+          {/* Hide character counter when loading */}
+          {!isLoading && (
+            <div className="absolute right-25 top-1/2 transform -translate-y-1/2 text-xs text-muted-foreground bg-white/50 px-1">
+              {input.length}/500
+            </div>
+          )}
+          <Button
+            onClick={() => handleSend()}
+            disabled={isLoading || !input.trim() || !hasHearts}
+            size="lg"
+            className="absolute right-2 top-2 h-10 px-4 gap-2"
+          >
+            {isLoading ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent"></div>
+            ) : (
+              <>
+                <Send className="h-4 w-4" />
+                Ask
+              </>
+            )}
+          </Button>
+        </div>
+      )}
 
-      {/* Suggested Questions */}
+
+      {/* Suggested Questions - Shows when no messages */}
       {hasHearts && messages.length === 0 && (
         <div className="space-y-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -329,47 +369,32 @@ export function AITutors() {
           </div>
         </div>
       )}
-
-      {/* Chat Input */}
-      {hasHearts && (
-        <div className="relative">
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder={`Ask about AI, business, or technology... (${hearts.heartsRemaining} hearts left)`}
-            className="h-14 text-lg pr-20 border-2 border-primary/20 focus:border-primary transition-colors shadow-sm"
-            onKeyPress={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault()
-                handleSend()
-              }
-            }}
-            maxLength={500}
-          />
-          <div className="absolute right-20 top-1/2 transform -translate-y-1/2 text-xs text-muted-foreground">
-            {input.length}/500
-          </div>
-          <Button
-            onClick={() => handleSend()}
-            disabled={isLoading || !input.trim() || !hasHearts}
-            size="lg"
-            className="absolute right-2 top-2 h-10 px-4 gap-2"
-          >
-            {isLoading ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent"></div>
-            ) : (
-              <>
-                <Send className="h-4 w-4" />
-                Ask
-              </>
-            )}
-          </Button>
-        </div>
+      {/* Loading Indicator - Shows at top when loading */}
+      {isLoading && (
+        <Card className="border border-green-200 bg-green-50/50">
+          <CardContent className="p-6">
+            <div className="flex items-start gap-4">
+              <div className="shrink-0 w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center">
+                <Bot className="h-5 w-5" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-3 text-green-600">
+                  <div className="flex gap-1">
+                    <div className="h-2 w-2 bg-green-600 rounded-full animate-bounce"></div>
+                    <div className="h-2 w-2 bg-green-600 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
+                    <div className="h-2 w-2 bg-green-600 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                  </div>
+                  <span className="text-sm">AI is thinking... 🧠</span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
-      {/* Messages */}
+      {/* Messages - REVERSED ORDER (latest first) */}
       <div className="space-y-4 min-h-[400px]">
-        {messages.map((message) => (
+        {messages.slice().reverse().map((message) => (
           <Card 
             key={message.id} 
             className={`border transition-all duration-200 hover:shadow-sm ${
@@ -407,45 +432,7 @@ export function AITutors() {
             </CardContent>
           </Card>
         ))}
-
-        {isLoading && (
-          <Card className="border border-green-200 bg-green-50/50">
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
-                <div className="shrink-0 w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center">
-                  <Bot className="h-5 w-5" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 text-green-600">
-                    <div className="flex gap-1">
-                      <div className="h-2 w-2 bg-green-600 rounded-full animate-bounce"></div>
-                      <div className="h-2 w-2 bg-green-600 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
-                      <div className="h-2 w-2 bg-green-600 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
-                    </div>
-                    <span className="text-sm">AI is thinking... 🧠</span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-        
-        <div ref={messagesEndRef} />
       </div>
-
-      {/* First Time User Guide */}
-      {hasHearts && messages.length === 0 && (
-        <Card className="border-2 border-blue-200 bg-blue-50">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <Lightbulb className="h-5 w-5 text-blue-500" />
-              <div className="text-sm text-blue-700">
-                <strong>Tip:</strong> You have {hearts.heartsRemaining} hearts today. Each question uses 1 heart. Hearts reset daily!
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   )
 }
