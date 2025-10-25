@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Sidebar } from "./sidebar"
 import { MobileHeader } from "./mobile-header"
@@ -24,8 +23,8 @@ export function DashboardLayout({ children, user, profile }: DashboardLayoutProp
         {/* Sidebar */}
         <Sidebar user={user} profile={profile} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-        {/* Main content - Container with 20px padding on sides */}
-        <main className="flex-1 p-2 lg:p-4 pt-16 lg:pt-4 min-w-0">
+        {/* Main content with 20px left margin */}
+        <main className="flex-1 p-2 lg:p-4 pt-16 lg:pt-4 min-w-0 ml-25 mr-22"> {/* Added ml-5 (20px) */}
           <div className="w-full max-w-none container mx-auto px-5">{children}</div>
         </main>
       </div>
