@@ -7,68 +7,44 @@ import { TrackHeader } from "@/components/learn/track-header"
 export default async function TrackPage({ params }: { params: Promise<{ trackId: string }> }) {
   const { trackId } = await params
   const supabase = await createClient()
+  
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser()
+    if (error || !user) redirect("/auth/login")
 
-  const { data, error } = await supabase.auth.getUser()
-  if (error || !data?.user) {
-    redirect("/auth/login")
-  }
+    const [profileData, trackData, progressData] = await Promise.all([
+      supabase.from("profiles").select("*").eq("id", user.id).single(),
+      supabase.from("learning_tracks").select(`*, modules(*, lessons(*))`).eq("id", trackId).single(),
+      supabase.from("user_progress").select(`*, lessons!inner(*, modules!inner(*))`).eq("user_id", user.id).eq("lessons.modules.track_id", trackId)
+    ])
 
-  // Get user profile
-  const { data: profile } = await supabase.from("profiles").select("*").eq("id", data.user.id).single()
+    // Early return for track not found
+    if (trackData.error || !trackData.data) redirect("/learn")
 
-  // Get track with modules and lessons
-  const { data: track } = await supabase
-    .from("learning_tracks")
-    .select(`
-      *,
-      modules(
-        *,
-        lessons(*)
-      )
-    `)
-    .eq("id", trackId)
-    .single()
+    const sortedModules = trackData.data.modules?.sort((a, b) => a.order_index - b.order_index) || []
 
-  if (!track) {
-    redirect("/learn")
-  }
-
-  // Get user progress for this track
-  const { data: userProgress } = await supabase
-    .from("user_progress")
-    .select(`
-      *,
-      lessons!inner(
-        *,
-        modules!inner(*)
-      )
-    `)
-    .eq("user_id", data.user.id)
-    .eq("lessons.modules.track_id", trackId)
-
-  return (
-    <DashboardLayout user={data.user} profile={profile}>
-      <div className="space-y-6">
-        <TrackHeader track={track} userProgress={userProgress || []} />
-
+    return (
+      <DashboardLayout user={user} profile={profileData.data}>
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-gray-800">Learning Modules</h2>
-          <div className="grid gap-6">
-            {track.modules
-              ?.sort((a, b) => a.order_index - b.order_index)
-              .map((module, index) => (
-                <ModuleCard
-                  key={module.id}
-                  module={module}
-                  trackId={trackId}
-                  isUnlocked={profile?.total_xp >= module.unlock_xp_required}
-                  userProgress={userProgress?.filter((p) => p.lessons?.module_id === module.id) || []}
-                  moduleIndex={index}
-                />
-              ))}
+          <TrackHeader track={trackData.data} userProgress={progressData.data || []} />
+          <h2 className="text-xl font-bold text-gray-800 mb-3">Learning Modules</h2>
+          <div className="space-y-3">
+            {sortedModules.map((module, index) => (
+              <ModuleCard 
+                key={module.id} 
+                module={module} 
+                trackId={trackId} 
+                isUnlocked={(profileData.data?.total_xp || 0) >= (module.unlock_xp_required || 0)}
+                userProgress={progressData.data?.filter(p => p.lessons?.module_id === module.id) || []}
+                moduleIndex={index} 
+              />
+            ))}
           </div>
         </div>
-      </div>
-    </DashboardLayout>
-  )
+      </DashboardLayout>
+    )
+  } catch (error) {
+    console.error("Track page error:", error)
+    redirect("/learn")
+  }
 }
