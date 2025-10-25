@@ -75,8 +75,8 @@ export function Sidebar({ user, profile, isOpen, onClose }: SidebarProps) {
       {/* Reduced width from w-80 to w-64 and lg:w-72 to lg:w-60 */}
       <div
         className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-[#F8FAFC] to-[#F1F5F9] shadow-xl transform transition-all duration-300 ease-in-out border-r border-[#E2E8F0]
-        lg:translate-x-0 lg:static lg:inset-0 lg:w-60
+        fixed inset-y-0 left-0 z-50 w-74 bg-gradient-to-b from-[#F8FAFC] to-[#F1F5F9] shadow-xl transform transition-all duration-300 ease-in-out border-r border-[#E2E8F0]
+        lg:translate-x-0 lg:static lg:inset-0 lg:w-65
         ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
       `}
       >
