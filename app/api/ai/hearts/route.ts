@@ -3,38 +3,52 @@ import { NextResponse } from "next/server"
 
 export async function GET() {
   try {
-    const supabase = await createClient()
+    const supabase = await createClient() // Added await here
     
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      // Return default values for unauthorized users
+      return NextResponse.json({
+        heartsRemaining: 5,
+        totalQuestions: 0,
+        resetDate: new Date().toISOString().split('T')[0],
+        canAskQuestions: true
+      })
     }
 
-    const today = new Date().toISOString().split('T')[0]
-    
     try {
-      const { data: usage, error } = await supabase
-        .from('user_ai_usage')
-        .select('hearts_remaining, total_questions_asked')
-        .eq('user_id', user.id)
-        .eq('hearts_reset_date', today)
-        .single()
+      // Use the database function to get user's AI usage
+      const { data: usageData, error: usageError } = await supabase
+        .rpc('get_user_ai_usage', { user_uuid: user.id })
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('Hearts query error:', error)
-        // Return default values if there's an error
+      if (usageError) {
+        console.error('Error getting user AI usage:', usageError)
+        // Return default values on error
         return NextResponse.json({
           heartsRemaining: 5,
           totalQuestions: 0,
-          resetDate: today
+          resetDate: new Date().toISOString().split('T')[0],
+          canAskQuestions: true
         })
       }
 
-      return NextResponse.json({
-        heartsRemaining: usage?.hearts_remaining || 5,
-        totalQuestions: usage?.total_questions_asked || 0,
-        resetDate: today
-      })
+      if (usageData && usageData.length > 0) {
+        const usage = usageData[0]
+        return NextResponse.json({
+          heartsRemaining: usage.hearts_remaining,
+          totalQuestions: usage.total_questions_asked,
+          resetDate: usage.hearts_reset_date,
+          canAskQuestions: usage.can_ask_questions
+        })
+      } else {
+        // No usage record found, return defaults
+        return NextResponse.json({
+          heartsRemaining: 5,
+          totalQuestions: 0,
+          resetDate: new Date().toISOString().split('T')[0],
+          canAskQuestions: true
+        })
+      }
 
     } catch (dbError) {
       console.error('Database error in hearts route:', dbError)
@@ -42,7 +56,8 @@ export async function GET() {
       return NextResponse.json({
         heartsRemaining: 5,
         totalQuestions: 0,
-        resetDate: today
+        resetDate: new Date().toISOString().split('T')[0],
+        canAskQuestions: true
       })
     }
 
@@ -52,7 +67,8 @@ export async function GET() {
     return NextResponse.json({
       heartsRemaining: 5,
       totalQuestions: 0,
-      resetDate: new Date().toISOString().split('T')[0]
+      resetDate: new Date().toISOString().split('T')[0],
+      canAskQuestions: true
     })
   }
 }
