@@ -6,22 +6,12 @@ import { Card } from "@/components/ui/card"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
 import { 
-  X, 
-  Home, 
-  BookOpen, 
-  Trophy, 
-  Users, 
-  Settings, 
-  LogOut, 
-  Sparkles, 
-  Flame, 
-  Crown, 
-  Zap, 
-  Brain,
-  GraduationCap
+  X, Home, BookOpen, Trophy, Users, Settings, LogOut, 
+  Sparkles, Flame, Crown, Brain, GraduationCap,
+  ChevronRight, Zap, Award, Target
 } from "lucide-react"
 import { LanguageSelector } from "@/components/language-selector"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 
 interface SidebarProps {
   user: any
@@ -31,24 +21,22 @@ interface SidebarProps {
 }
 
 const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: Home, description: "Overview" },
-  { name: "Learn", href: "/learn", icon: BookOpen, description: "Lessons" },
-  { name: "AI Tutor", href: "/dashboard/ai-tutor", icon: Brain, description: "AI Assistance" },
-  { name: "Achievements", href: "/achievements", icon: Trophy, description: "Progress" },
-  { name: "Leaderboard", href: "/leaderboard", icon: Users, description: "Rankings" },
-  { name: "Settings", href: "/settings", icon: Settings, description: "Account" },
+  { name: "Dashboard", href: "/dashboard", icon: Home, description: "Your learning overview", badge: null },
+  { name: "Learn", href: "/learn", icon: BookOpen, description: "Continue lessons", badge: "updated" },
+  { name: "AI Tutor", href: "/dashboard/ai-tutor", icon: Brain, description: "Get help instantly", badge: "new" },
+  { name: "Achievements", href: "/achievements", icon: Trophy, description: "Your progress", badge: null },
+  { name: "Leaderboard", href: "/leaderboard", icon: Users, description: "See rankings", badge: null },
+  { name: "Settings", href: "/settings", icon: Settings, description: "Account & preferences", badge: null },
 ]
 
 export function Sidebar({ user, profile, isOpen, onClose }: SidebarProps) {
   const router = useRouter()
   const pathname = usePathname()
   const supabase = createClient()
+  const [isHovered, setIsHovered] = useState(false)
 
-  // Close sidebar when route changes on mobile
   useEffect(() => {
-    if (isOpen) {
-      onClose()
-    }
+    if (isOpen) onClose()
   }, [pathname])
 
   const handleSignOut = async () => {
@@ -56,201 +44,233 @@ export function Sidebar({ user, profile, isOpen, onClose }: SidebarProps) {
     router.push("/")
   }
 
-  // Calculate user level based on XP (example: 100 XP per level)
   const userLevel = profile?.total_xp ? Math.floor(profile.total_xp / 100) + 1 : 1
-  const xpForNextLevel = userLevel * 100
   const currentLevelXp = profile?.total_xp ? profile.total_xp % 100 : 0
-  const progressPercentage = (currentLevelXp / 100) * 100
 
   return (
-    <>
-      {/* Enhanced Overlay for mobile */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden animate-in fade-in duration-300"
-          onClick={onClose}
-        />
-      )}
-      
-      {/* Reduced width from w-80 to w-64 and lg:w-72 to lg:w-60 */}
-      <div
-        className={`
-        fixed inset-y-0 left-0 z-50 w-74 bg-gradient-to-b from-[#F8FAFC] to-[#F1F5F9] shadow-xl transform transition-all duration-300 ease-in-out border-r border-[#E2E8F0]
-        lg:translate-x-0 lg:static lg:inset-0 lg:w-65
-        ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+    <div 
+      className={`
+        w-80 h-full bg-white/95 backdrop-blur-md border-r border-gray-100
+        flex flex-col shadow-xl
+        lg:bg-white lg:backdrop-blur-0 lg:shadow-none
       `}
-      >
-        <div className="flex flex-col h-full">
-          {/* Compact Header */}
-          <div className="flex items-center justify-between p-4 border-b border-[#E2E8F0] bg-white/80 backdrop-blur-sm">
-            <div className="flex items-center space-x-2">
-              <div className="p-1.5 bg-gradient-to-r from-[#6A0DAD] to-[#004AAD] rounded-lg shadow-md">
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      
+      {/* Header Section */}
+      <div className="flex-shrink-0">
+        {/* Brand Header */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-100">
+          <div className="flex items-center space-x-3">
+            <div className="relative">
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
                 <Sparkles className="h-5 w-5 text-white" />
               </div>
-              <div>
-                <span className="text-lg font-bold text-[#6A0DAD]">Bloolabb</span>
-                <span className="text-xs text-[#004AAD] font-medium block -mt-0.5">Learning Hub</span>
-              </div>
+              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
             </div>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={onClose} 
-              className="lg:hidden rounded-lg h-8 w-8 p-0 hover:bg-[#6A0DAD]/10 transition-all duration-200"
-            >
-              <X className="h-4 w-4 text-[#6A0DAD]" />
-            </Button>
-          </div>
-
-          {/* Compact User Profile Card */}
-          <div className="p-3">
-            <Card className="p-4 bg-gradient-to-br from-[#6A0DAD] via-[#004AAD] to-[#8B5FBF] text-white shadow-lg border-0 rounded-xl overflow-hidden relative group hover:shadow-xl transition-all duration-300">
-              {/* Simplified background elements */}
-              <div className="absolute top-0 right-0 w-16 h-16 bg-white/10 rounded-full -translate-y-8 translate-x-8"></div>
-              <div className="absolute bottom-0 left-0 w-12 h-12 bg-white/5 rounded-full -translate-x-6 translate-y-6"></div>
-              
-              <div className="relative z-10">
-                <div className="flex items-center space-x-3 mb-3">
-                  <div className="relative">
-                    <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/30 shadow-md">
-                      <div className="text-xl">👤</div>
-                    </div>
-                    {profile?.current_streak > 0 && (
-                      <div className="absolute -top-1 -right-1 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full p-1 shadow-lg">
-                        <Flame className="h-2.5 w-2.5 text-white" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-sm truncate text-white mb-1">
-                      {profile?.display_name || "New Learner"}
-                    </p>
-                    <div className="flex items-center space-x-2">
-                      <div className="flex items-center bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm border border-white/20">
-                        <Crown className="h-2.5 w-2.5 mr-1 text-amber-300" />
-                        <span className="text-xs font-semibold">Level {userLevel}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Compact Progress Bar */}
-                <div className="mb-3">
-                  <div className="flex justify-between text-xs font-medium mb-2">
-                    <span className="text-white/90">{currentLevelXp} XP</span>
-                    <span className="text-white/90">{xpForNextLevel} XP</span>
-                  </div>
-                  <div className="w-full bg-white/20 rounded-full h-2 backdrop-blur-sm overflow-hidden">
-                    <div 
-                      className="bg-gradient-to-r from-amber-400 to-amber-300 h-2 rounded-full shadow-sm transition-all duration-500"
-                      style={{ width: `${progressPercentage}%` }}
-                    ></div>
-                  </div>
-                </div>
-
-                {/* Compact Stats Row */}
-                <div className="flex justify-between space-x-2">
-                  <div className="flex-1 text-center bg-white/15 rounded-lg p-2 backdrop-blur-sm border border-white/10">
-                    <div className="flex items-center justify-center space-x-1 mb-1">
-                      <Sparkles className="h-3 w-3 text-purple-200" />
-                      <span className="text-xs font-bold text-white">{profile?.total_xp || 0}</span>
-                    </div>
-                    <div className="text-[10px] text-white/80">Total XP</div>
-                  </div>
-                  <div className="flex-1 text-center bg-white/15 rounded-lg p-2 backdrop-blur-sm border border-white/10">
-                    <div className="flex items-center justify-center space-x-1 mb-1">
-                      <Flame className="h-3 w-3 text-amber-400" />
-                      <span className="text-xs font-bold text-white">{profile?.current_streak || 0}</span>
-                    </div>
-                    <div className="text-[10px] text-white/80">Day Streak</div>
-                  </div>
-                  <div className="flex-1 text-center bg-white/15 rounded-lg p-2 backdrop-blur-sm border border-white/10">
-                    <div className="flex items-center justify-center space-x-1 mb-1">
-                      <GraduationCap className="h-3 w-3 text-blue-300" />
-                      <span className="text-xs font-bold text-white">{userLevel}</span>
-                    </div>
-                    <div className="text-[10px] text-white/80">Level</div>
-                  </div>
-                </div>
-              </div>
-            </Card>
-          </div>
-
-          {/* Compact Language Selector */}
-          <div className="px-3 mb-4">
-            <div className="bg-white/80 backdrop-blur-sm rounded-lg p-2 border border-[#E2E8F0] shadow-sm">
-              <LanguageSelector />
+            <div>
+              <h1 className="font-bold text-gray-900 text-lg">Bloolabb</h1>
+              <p className="text-xs text-gray-500">Learning Platform</p>
             </div>
           </div>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={onClose} 
+            className="lg:hidden h-8 w-8 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
 
-          {/* Compact Navigation */}
-          <nav className="flex-1 px-2 space-y-1">
-            {navigation.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
-              const Icon = item.icon
-
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`
-                    flex items-center space-x-3 px-3 py-3 rounded-lg transition-all duration-200 group relative
-                    ${
-                      isActive
-                        ? "bg-white text-[#6A0DAD] shadow-md border border-[#6A0DAD]/15"
-                        : "text-[#475569] hover:bg-white hover:text-[#6A0DAD] hover:shadow-sm hover:border hover:border-[#6A0DAD]/10 border border-transparent"
-                    }
-                  `}
-                >
-                  {/* Active indicator */}
-                  {isActive && (
-                    <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-[#6A0DAD] to-[#004AAD] rounded-r-full"></div>
+        {/* User Profile Card */}
+        <div className="p-4">
+          <Card className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-5 shadow-2xl border-0 overflow-hidden relative group cursor-pointer hover:shadow-2xl transition-all duration-300">
+            
+            {/* Animated Background Elements */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-16 translate-x-16 group-hover:scale-110 transition-transform duration-500"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-blue-500/10 rounded-full -translate-x-12 translate-y-12 group-hover:scale-110 transition-transform duration-700"></div>
+            
+            <div className="relative z-10">
+              {/* User Info Row */}
+              <div className="flex items-center space-x-4 mb-4">
+                <div className="relative">
+                  <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm border border-white/20 shadow-lg group-hover:scale-105 transition-transform duration-300">
+                    <div className="text-2xl">🎓</div>
+                  </div>
+                  {profile?.current_streak > 0 && (
+                    <div className="absolute -top-1 -right-1 bg-gradient-to-r from-orange-500 to-red-500 rounded-full p-1.5 shadow-lg animate-pulse">
+                      <Flame className="h-3 w-3 text-white" />
+                    </div>
                   )}
-                  
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-bold text-lg truncate mb-1">
+                    {profile?.display_name || "New Learner"}
+                  </h3>
+                  <div className="flex items-center space-x-2">
+                    <div className="flex items-center bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm border border-white/20">
+                      <Crown className="h-3.5 w-3.5 mr-1.5 text-amber-300" />
+                      <span className="text-sm font-semibold">Level {userLevel}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Progress Section */}
+              <div className="space-y-3">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-300">Progress to Level {userLevel + 1}</span>
+                  <span className="font-semibold">{currentLevelXp}/100 XP</span>
+                </div>
+                <div className="w-full bg-white/20 rounded-full h-2.5 backdrop-blur-sm overflow-hidden">
+                  <div 
+                    className="bg-gradient-to-r from-amber-400 to-amber-300 h-2.5 rounded-full shadow-sm transition-all duration-1000 ease-out"
+                    style={{ width: `${(currentLevelXp / 100) * 100}%` }}
+                  ></div>
+                </div>
+                
+                {/* Stats Grid */}
+                <div className="grid grid-cols-3 gap-2 pt-2">
+                  <div className="text-center p-2 bg-white/10 rounded-lg backdrop-blur-sm border border-white/10 hover:bg-white/15 transition-colors">
+                    <div className="flex items-center justify-center space-x-1 mb-1">
+                      <Zap className="h-3.5 w-3.5 text-amber-400" />
+                      <span className="font-bold text-sm">{profile?.total_xp || 0}</span>
+                    </div>
+                    <div className="text-xs text-gray-300">Total XP</div>
+                  </div>
+                  <div className="text-center p-2 bg-white/10 rounded-lg backdrop-blur-sm border border-white/10 hover:bg-white/15 transition-colors">
+                    <div className="flex items-center justify-center space-x-1 mb-1">
+                      <Flame className="h-3.5 w-3.5 text-orange-500" />
+                      <span className="font-bold text-sm">{profile?.current_streak || 0}</span>
+                    </div>
+                    <div className="text-xs text-gray-300">Day Streak</div>
+                  </div>
+                  <div className="text-center p-2 bg-white/10 rounded-lg backdrop-blur-sm border border-white/10 hover:bg-white/15 transition-colors">
+                    <div className="flex items-center justify-center space-x-1 mb-1">
+                      <Target className="h-3.5 w-3.5 text-blue-400" />
+                      <span className="font-bold text-sm">{userLevel}</span>
+                    </div>
+                    <div className="text-xs text-gray-300">Level</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
+
+      {/* Scrollable Content Area */}
+      <div className="flex-1 overflow-y-auto">
+        {/* Language Selector */}
+        <div className="px-4 mb-6">
+          <div className="bg-gray-50/80 backdrop-blur-sm rounded-xl p-3 border border-gray-200 hover:border-gray-300 transition-colors">
+            <LanguageSelector />
+          </div>
+        </div>
+
+        {/* Navigation Section */}
+        <nav className="px-3 space-y-1.5 pb-6">
+          <div className="px-3 mb-3">
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Navigation</h3>
+          </div>
+          
+          {navigation.map((item) => {
+            const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
+            const Icon = item.icon
+
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`
+                  group flex items-center justify-between px-3 py-3 rounded-xl transition-all duration-200 relative
+                  ${isActive
+                    ? "bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 border border-purple-200 shadow-sm"
+                    : "text-gray-700 hover:bg-gray-50 hover:text-gray-900 hover:shadow-sm border border-transparent"
+                  }
+                `}
+              >
+                <div className="flex items-center space-x-3">
                   <div className={`
-                    p-1.5 rounded-md transition-all duration-200
+                    p-2 rounded-lg transition-all duration-200
                     ${isActive 
-                      ? "bg-gradient-to-r from-[#6A0DAD] to-[#004AAD] text-white shadow-sm" 
-                      : "bg-[#F1F5F9] text-[#475569] group-hover:bg-gradient-to-r group-hover:from-[#6A0DAD] group-hover:to-[#004AAD] group-hover:text-white"
+                      ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-sm" 
+                      : "bg-gray-100 text-gray-600 group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:to-blue-600 group-hover:text-white"
                     }
                   `}>
-                    <Icon className={`h-4 w-4 transition-transform duration-200 ${
-                      isActive ? "scale-105" : "group-hover:scale-105"
-                    }`} />
+                    <Icon className="h-4 w-4" />
                   </div>
                   
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm transition-colors duration-200">
-                      {item.name}
+                    <div className="flex items-center space-x-2">
+                      <span className="font-medium text-sm transition-colors duration-200">
+                        {item.name}
+                      </span>
+                      {item.badge && (
+                        <span className={`
+                          px-1.5 py-0.5 rounded-full text-xs font-medium
+                          ${item.badge === 'new' 
+                            ? 'bg-green-100 text-green-700' 
+                            : 'bg-blue-100 text-blue-700'
+                          }
+                        `}>
+                          {item.badge}
+                        </span>
+                      )}
                     </div>
                     <div className={`text-xs transition-all duration-200 ${
-                      isActive ? "text-[#6A0DAD]/80" : "text-[#64748B] group-hover:text-[#6A0DAD]/80"
+                      isActive ? "text-purple-600/80" : "text-gray-500 group-hover:text-gray-700"
                     }`}>
                       {item.description}
                     </div>
                   </div>
-                </Link>
-              )
-            })}
-          </nav>
-
-          {/* Compact Sign Out */}
-          <div className="p-4 border-t border-[#E2E8F0] bg-white/50 backdrop-blur-sm mt-auto">
-            <Button
-              onClick={handleSignOut}
-              variant="ghost"
-              className="w-full justify-start text-[#DC2626] hover:text-white hover:bg-gradient-to-r hover:from-[#DC2626] hover:to-[#EF4444] rounded-lg py-3 transition-all duration-200 group border border-[#FECACA] hover:border-transparent"
-            >
-              <div className="flex items-center space-x-2">
-                <div className="p-1 bg-[#FECACA] rounded-md group-hover:bg-white/20 transition-colors">
-                  <LogOut className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </div>
-                <span className="font-medium text-sm">Sign Out</span>
+                
+                {/* Active indicator & hover arrow */}
+                {isActive && (
+                  <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-purple-600 to-blue-600 rounded-r-full"></div>
+                )}
+                <ChevronRight className={`
+                  h-4 w-4 transition-transform duration-200
+                  ${isActive ? "text-purple-600" : "text-gray-400 group-hover:text-gray-600"}
+                  group-hover:translate-x-0.5
+                `} />
+              </Link>
+            )
+          })}
+        </nav>
+      </div>
+
+      {/* Footer Section */}
+      <div className="flex-shrink-0 border-t border-gray-200 bg-gray-50/50 backdrop-blur-sm">
+        <div className="p-4">
+          <Button
+            onClick={handleSignOut}
+            variant="ghost"
+            className="w-full justify-start text-gray-700 hover:text-red-700 hover:bg-red-50 rounded-xl py-3 transition-all duration-200 group"
+          >
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-gray-200 rounded-lg group-hover:bg-red-100 group-hover:text-red-600 transition-colors">
+                <LogOut className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
               </div>
-            </Button>
+              <span className="font-medium text-sm">Sign Out</span>
+            </div>
+          </Button>
+          
+          {/* Version/Status */}
+          <div className="mt-3 pt-3 border-t border-gray-200">
+            <div className="flex items-center justify-between text-xs text-gray-500">
+              <span>v2.1.0</span>
+              <div className="flex items-center space-x-1">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span>All systems operational</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   )
 }
