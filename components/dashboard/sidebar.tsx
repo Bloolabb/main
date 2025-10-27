@@ -23,7 +23,7 @@ interface SidebarProps {
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: Home, description: "Your learning overview", badge: null },
   { name: "Learn", href: "/learn", icon: BookOpen, description: "Continue lessons", badge: "updated" },
-  { name: "AI Tutor", href: "/dashboard/ai-tutor", icon: Brain, description: "Get help instantly", badge: "new" },
+  { name: "AI Tutor", href: "/ai-tutor", icon: Brain, description: "Get help instantly", badge: "beta" },
   { name: "Achievements", href: "/achievements", icon: Trophy, description: "Your progress", badge: null },
   { name: "Leaderboard", href: "/leaderboard", icon: Users, description: "See rankings", badge: null },
   { name: "Settings", href: "/settings", icon: Settings, description: "Account & preferences", badge: null },
@@ -59,7 +59,7 @@ export function Sidebar({ user, profile, isOpen, onClose }: SidebarProps) {
     >
       
       {/* Header Section */}
-      <div className="flex-shrink-0">
+      <div className="shrink-0">
         {/* Brand Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-100">
           <div className="flex items-center space-x-3">
