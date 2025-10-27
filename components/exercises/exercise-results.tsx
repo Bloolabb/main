@@ -61,7 +61,7 @@ export function ExerciseResults({
       {/* Results Header */}
       <Card className="border-2 border-gray-100 shadow-xl">
         <CardHeader
-          className={`text-center ${passed ? "bg-gradient-to-r from-green-500 to-blue-600" : "bg-gradient-to-r from-red-500 to-orange-600"} text-white`}
+          className={`text-center ${passed ? "bg-linear-to-r from-green-500 to-blue-600" : "bg-linear-to-r from-red-500 to-orange-600"} text-white`}
         >
           <div className="flex justify-center mb-4">{getScoreIcon()}</div>
           <CardTitle className="text-3xl font-bold">{getScoreMessage()}</CardTitle>
@@ -136,7 +136,8 @@ export function ExerciseResults({
       <div className="flex justify-center space-x-4">
         {!passed && (
           <Button
-            onClick={() => router.refresh()}
+          //  fall back navigate backwards bc we dont know lessonId || or instead of refreshing the whole page, we could navigate to the same page to reset state 
+            onClick={() => router.back()}
             className="flex items-center space-x-2 bg-orange-500 hover:bg-orange-600"
           >
             <RotateCcw className="h-4 w-4" />
