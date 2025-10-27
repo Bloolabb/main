@@ -5,10 +5,11 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Brain, Rocket, Sparkles, BookOpen, Globe, Award, ChevronRight, Star, Zap, Lightbulb, Heart, TrendingUp, Palette, Users, Check, Crown, X } from "lucide-react";
+import { ArrowRight, Brain, Rocket, Sparkles, BookOpen, Globe, Award, ChevronRight, Star, Zap, Lightbulb, Heart, TrendingUp, Palette, Users, Check, Crown, X, Menu } from "lucide-react";
 import { LanguageSelector } from "@/components/language-selector";
 import heroImage from "@/assets/hero-image.webp";
 import Image from "next/image";
+
 // Define types for our color mapping
 type ColorType = "primary" | "secondary" | "accent";
 
@@ -47,17 +48,17 @@ const colorMap: ColorMap = {
 function RegistrationForm({ isOpen, onClose, planType }: { isOpen: boolean; onClose: () => void; planType: string }) {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <Card className="bg-card border-border p-6 max-w-md w-full rounded-lg shadow-glow">
-        <CardHeader className="flex items-center justify-between">
-          <CardTitle className="text-2xl font-bold text-primary">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <Card className="bg-card border-border p-4 sm:p-6 max-w-md w-full rounded-lg shadow-glow">
+        <CardHeader className="flex flex-row items-center justify-between p-0 mb-4">
+          <CardTitle className="text-xl sm:text-2xl font-bold text-primary">
             Register for {planType.charAt(0).toUpperCase() + planType.slice(1)} Plan
           </CardTitle>
-          <Button variant="ghost" onClick={onClose} className="text-muted-foreground">
+          <Button variant="ghost" onClick={onClose} className="text-muted-foreground p-2">
             <X className="w-5 h-5" />
           </Button>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           <p className="text-muted-foreground mb-4">Sign up to start your free trial!</p>
           <div className="space-y-4">
             <input
@@ -86,7 +87,6 @@ interface LpgccItem {
   icon: React.ComponentType<{ className?: string }>;
   description: string;
   color: ColorType;
-  // detail: string;
   benefits: string[];
 }
 
@@ -97,7 +97,6 @@ const lpgccItems: LpgccItem[] = [
     icon: BookOpen,
     description: "Bite-sized courses on business, tech, and life skills",
     color: "primary",
-    // detail: "Interactive video lessons, quizzes, and challenges that adapt to your learning style",
     benefits: ["Business fundamentals", "Coding basics", "Financial literacy", "Communication skills"],
   },
   {
@@ -106,7 +105,6 @@ const lpgccItems: LpgccItem[] = [
     icon: Brain,
     description: "Gamified lessons and simulators to boost retention",
     color: "secondary",
-    // detail: "Turn learning into an adventure with points, badges, and friendly competition",
     benefits: ["XP & leveling system", "Achievement badges", "Learning streaks", "Multiplayer challenges"],
   },
   {
@@ -115,7 +113,6 @@ const lpgccItems: LpgccItem[] = [
     icon: TrendingUp,
     description: "Develop confidence, teamwork, and emotional intelligence",
     color: "primary",
-    // detail: "Build self-awareness, empathy, and leadership skills through guided activities",
     benefits: ["Confidence building", "Emotional regulation", "Leadership skills", "Self-reflection"],
   },
   {
@@ -124,7 +121,6 @@ const lpgccItems: LpgccItem[] = [
     icon: Palette,
     description: "Build real-world projects with household materials or kits",
     color: "secondary",
-    // detail: "From cardboard robots to mobile apps - bring imagination to life",
     benefits: ["DIY projects", "App prototypes", "Art & design", "Innovation challenges"],
   },
   {
@@ -133,7 +129,6 @@ const lpgccItems: LpgccItem[] = [
     icon: Users,
     description: "A safe online space to share progress, wins, and stories",
     color: "primary",
-    // detail: "Collaborate with peers worldwide in a secure, moderated environment",
     benefits: ["Global community", "Project sharing", "Peer mentoring", "Safe interactions"],
   },
 ];
@@ -141,6 +136,7 @@ const lpgccItems: LpgccItem[] = [
 export default function HomePage() {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleRegistration = (planType: string) => {
     setSelectedPlan(planType);
@@ -151,72 +147,115 @@ export default function HomePage() {
     <div className="min-h-screen bg-background font-sans">
       {/* Header */}
       <header className="bg-card shadow-card fixed top-0 w-full z-50">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="container mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
               <Sparkles className="h-5 w-5 text-primary-foreground" />
             </div>
             <span className="text-xl font-extrabold text-primary">bloolabb</span>
           </div>
-          <nav className="hidden md:flex gap-8">
-            <Link href="#features" className="text-foreground hover:text-secondary font-semibold transition-smooth">
+          
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex gap-6 lg:gap-8">
+            <Link href="#features" className="text-foreground hover:text-secondary font-semibold transition-smooth text-sm lg:text-base">
               Features
             </Link>
-            <Link href="#lpgcc" className="text-foreground hover:text-secondary font-semibold transition-smooth">
+            <Link href="#lpgcc" className="text-foreground hover:text-secondary font-semibold transition-smooth text-sm lg:text-base">
               How It Works
             </Link>
-            <Link href="#courses" className="text-foreground hover:text-secondary font-semibold transition-smooth">
+            <Link href="#courses" className="text-foreground hover:text-secondary font-semibold transition-smooth text-sm lg:text-base">
               Courses
             </Link>
-            <Link href="#about" className="text-foreground hover:text-secondary font-semibold transition-smooth">
+            <Link href="#about" className="text-foreground hover:text-secondary font-semibold transition-smooth text-sm lg:text-base">
               About
             </Link>
-              
-            <Link href="/school" className="text-foreground hover:text-secondary font-semibold transition-smooth">
+            <Link href="/school" className="text-foreground hover:text-secondary font-semibold transition-smooth text-sm lg:text-base">
               School
             </Link>
           </nav>
-          <div className="flex items-center gap-4">
+          
+          {/* Desktop CTA */}
+          <div className="hidden md:flex items-center gap-4">
             <LanguageSelector />
-            <Button variant="ghost" className="text-foreground hover:bg-primary hover:text-primary-foreground font-semibold">
+            <Button variant="ghost" className="text-foreground hover:bg-primary hover:text-primary-foreground font-semibold hidden lg:flex">
               <Link href="/auth/login">Sign In</Link>
             </Button>
-            <Button className="bg-secondary hover:bg-primary text-secondary-foreground font-semibold rounded-full px-6">
+            <Button className="bg-secondary hover:bg-primary text-secondary-foreground font-semibold rounded-full px-4 lg:px-6">
               <Link href="/auth/sign-up">Get Started</Link>
             </Button>
           </div>
+
+          {/* Mobile Menu Button */}
+          <button 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 text-foreground"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
         </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-card border-t border-border">
+            <nav className="container mx-auto px-4 py-4 flex flex-col gap-4">
+              <Link href="#features" className="text-foreground hover:text-secondary font-semibold transition-smooth" onClick={() => setMobileMenuOpen(false)}>
+                Features
+              </Link>
+              <Link href="#lpgcc" className="text-foreground hover:text-secondary font-semibold transition-smooth" onClick={() => setMobileMenuOpen(false)}>
+                How It Works
+              </Link>
+              <Link href="#courses" className="text-foreground hover:text-secondary font-semibold transition-smooth" onClick={() => setMobileMenuOpen(false)}>
+                Courses
+              </Link>
+              <Link href="#about" className="text-foreground hover:text-secondary font-semibold transition-smooth" onClick={() => setMobileMenuOpen(false)}>
+                About
+              </Link>
+              <Link href="/school" className="text-foreground hover:text-secondary font-semibold transition-smooth" onClick={() => setMobileMenuOpen(false)}>
+                School
+              </Link>
+              <div className="flex flex-col gap-2 pt-2 border-t border-border">
+                <LanguageSelector />
+                <Button variant="ghost" className="text-foreground hover:bg-primary hover:text-primary-foreground font-semibold justify-start">
+                  <Link href="/auth/login">Sign In</Link>
+                </Button>
+                <Button className="bg-secondary hover:bg-primary text-secondary-foreground font-semibold rounded-full">
+                  <Link href="/auth/sign-up">Get Started</Link>
+                </Button>
+              </div>
+            </nav>
+          </div>
+        )}
       </header>
 
      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-background via-primary/5 to-accent/10 mt-19">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-background via-primary/5 to-accent/10 pt-20">
         {/* Floating decoration elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-20 left-10 animate-float">
+          <div className="absolute top-20 left-10 animate-float hidden sm:block">
             <Sparkles className="w-8 h-8 text-primary opacity-60" />
           </div>
-          <div className="absolute top-40 right-20 animate-float" style={{ animationDelay: '1s' }}>
+          <div className="absolute top-40 right-20 animate-float hidden sm:block" style={{ animationDelay: '1s' }}>
             <Star className="w-6 h-6 text-warning opacity-50" />
           </div>
-          <div className="absolute bottom-40 left-20 animate-float" style={{ animationDelay: '2s' }}>
+          <div className="absolute bottom-40 left-20 animate-float hidden sm:block" style={{ animationDelay: '2s' }}>
             <Zap className="w-10 h-10 text-accent opacity-40" />
           </div>
-          <div className="absolute bottom-20 right-10 animate-float" style={{ animationDelay: '1.5s' }}>
+          <div className="absolute bottom-20 right-10 animate-float hidden sm:block" style={{ animationDelay: '1.5s' }}>
             <Rocket className="w-8 h-8 text-secondary opacity-50" />
           </div>
         </div>
 
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="container mx-auto px-4 sm:px-6 relative z-10 py-12 sm:py-0">
+          <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 items-center">
             {/* Left side - Text content */}
-            <div className="text-center lg:text-left space-y-8">
+            <div className="text-center lg:text-left space-y-6 sm:space-y-8">
               <div className="space-y-4">
-                <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-semibold">
+                <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-xs sm:text-sm font-semibold">
                   <Sparkles className="w-4 h-4" />
                   Over 3,000+ Future Founders Waiting
                 </div>
                 
-                <h1 className="text-4xl md:text-6xl xl:text-6xl font-black leading-tight">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black leading-tight">
                   <span className="text-gradient-primary">
                     Empower Your Child
                   </span>
@@ -230,23 +269,22 @@ export default function HomePage() {
                   </span>
                 </h1>
                 
-                <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl">
+                <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto lg:mx-0">
                   Business, Tech, Creativity & Emotional Intelligence — All in One 
                   <span className="font-bold text-primary"> user friendly</span> Platform
                 </p>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Button className="group bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 rounded-full text-lg font-bold transition-all">
+                <Button className="group bg-primary hover:bg-primary/90 text-primary-foreground px-6 sm:px-8 py-5 sm:py-6 rounded-full text-base sm:text-lg font-bold transition-all">
                   <Link href="/auth/sign-up" className="flex items-center">
                     <Rocket className="w-5 h-5 mr-2 group-hover:animate-pulse-fun" />
                     Start now
                   </Link>
                 </Button>
-
               </div>
 
-              <div className="flex items-center justify-center lg:justify-start gap-8 text-sm text-muted-foreground">
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 sm:gap-8 text-xs sm:text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-accent rounded-full animate-pulse-fun"></div>
                   Ages 6-18
@@ -263,7 +301,7 @@ export default function HomePage() {
             </div>
 
             {/* Right side - Hero image */}
-            <div className="relative">
+            <div className="relative mt-8 lg:mt-0">
               <div className="relative">
                 <Image
                   src={heroImage}
@@ -272,13 +310,13 @@ export default function HomePage() {
                 />
                 
                 {/* Floating achievement badges */}
-                <div className="absolute -top-4 -left-4 bg-gradient-success text-primary-foreground px-4 py-2 rounded-full text-sm font-bold shadow-glow">
-                  <Star className="w-4 h-4 inline mr-1" />
+                <div className="absolute -top-4 -left-4 bg-gradient-success text-primary-foreground px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-bold shadow-glow">
+                  <Star className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1" />
                   Level Up!
                 </div>
                 
-                <div className="absolute -bottom-4 -right-4 bg-secondary text-primary-foreground px-4 py-2 rounded-full text-sm font-bold shadow-glow">
-                  <Zap className="w-4 h-4 inline mr-1" />
+                <div className="absolute -bottom-4 -right-4 bg-secondary text-primary-foreground px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-bold shadow-glow">
+                  <Zap className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1" />
                   +50 XP
                 </div>
               </div>
@@ -288,29 +326,29 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-16 px-6 bg-card">
+      <section id="features" className="py-12 sm:py-16 px-4 sm:px-6 bg-card">
         <div className="container mx-auto max-w-5xl">
-          <h2 className="text-3xl md:text-4xl font-extrabold text-center text-primary mb-12">Why Choose bloolabb ?</h2>
-          <div className="grid md:grid-cols-2 gap-8">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-center text-primary mb-8 sm:mb-12">Why Choose bloolabb ?</h2>
+          <div className="grid sm:grid-cols-2 gap-6 sm:gap-8">
             <Card className="bg-card border-border shadow-card hover:shadow-glow transition-smooth">
               <CardHeader className="flex flex-row items-center gap-4">
-                <div className="w-14 h-14 bg-primary rounded-lg flex items-center justify-center">
-                  <Brain className="h-8 w-8 text-primary-foreground" />
+                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Brain className="h-6 w-6 sm:h-8 sm:w-8 text-primary-foreground" />
                 </div>
                 <div>
-                  <CardTitle className="text-xl font-bold text-foreground">Interactive AI Learning</CardTitle>
-                  <p className="text-muted-foreground font-medium">Master AI concepts through engaging simulations and hands-on activities.</p>
+                  <CardTitle className="text-lg sm:text-xl font-bold text-foreground">Interactive AI Learning</CardTitle>
+                  <p className="text-sm sm:text-base text-muted-foreground font-medium">Master AI concepts through engaging simulations and hands-on activities.</p>
                 </div>
               </CardHeader>
             </Card>
             <Card className="bg-card border-border shadow-card hover:shadow-glow transition-smooth">
               <CardHeader className="flex flex-row items-center gap-4">
-                <div className="w-14 h-14 bg-secondary rounded-lg flex items-center justify-center">
-                  <Rocket className="h-8 w-8 text-secondary-foreground" />
+                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-secondary rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Rocket className="h-6 w-6 sm:h-8 sm:w-8 text-secondary-foreground" />
                 </div>
                 <div>
-                  <CardTitle className="text-xl font-bold text-foreground">Business Challenges</CardTitle>
-                  <p className="text-muted-foreground font-medium">Develop entrepreneurial skills by tackling real-world business scenarios.</p>
+                  <CardTitle className="text-lg sm:text-xl font-bold text-foreground">Business Challenges</CardTitle>
+                  <p className="text-sm sm:text-base text-muted-foreground font-medium">Develop entrepreneurial skills by tackling real-world business scenarios.</p>
                 </div>
               </CardHeader>
             </Card>
@@ -319,41 +357,42 @@ export default function HomePage() {
       </section>
 
       {/* LPGCC Section */}
-      <section id="lpgcc" className="py-24 ">
-        <div className="container mx-auto px-4">
-          <div className="text-center space-y-8 mb-20">
+      <section id="lpgcc" className="py-12 sm:py-24">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="text-center space-y-6 sm:space-y-8 mb-12 sm:mb-20">
             <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-6 py-3 rounded-full font-bold text-sm">
-                <Lightbulb className="w-5 h-5" />
+              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 sm:px-6 py-2 sm:py-3 rounded-full font-bold text-xs sm:text-sm">
+                <Lightbulb className="w-4 h-4 sm:w-5 sm:h-5" />
                 Our Secret Sauce
               </div>
-              <h2 className="text-4xl md:text-6xl font-black leading-tight">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-tight">
                 Our Proven Learning Method:
                 <br />
                 <span className="text-primary">LPGCC</span>
               </h2>
-              <p className="text-xl md:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
+              <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed px-4">
                 LPGCC is our unique approach, blending <span className="font-bold text-primary">IQ</span>,
-                <span className="font-bold text-accent">EQ</span>, and
+                <span className="font-bold text-accent"> EQ</span>, and
                 <span className="font-bold text-secondary"> creativity</span> to make learning fun and effective.
               </p>
             </div>
-            <div className="flex flex-wrap justify-center gap-6 max-w-3xl mx-auto">
-              <div className="flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full font-semibold">
-                <Lightbulb className="w-4 h-4" />
+            <div className="flex flex-wrap justify-center gap-3 sm:gap-6 max-w-3xl mx-auto px-4">
+              <div className="flex items-center gap-2 bg-primary/10 text-primary px-3 sm:px-4 py-2 rounded-full font-semibold text-xs sm:text-base">
+                <Lightbulb className="w-3 h-3 sm:w-4 sm:h-4" />
                 Boosts IQ
               </div>
-              <div className="flex items-center gap-2 bg-accent/10 text-accent px-4 py-2 rounded-full font-semibold">
-                <Heart className="w-4 h-4" />
+              <div className="flex items-center gap-2 bg-accent/10 text-accent px-3 sm:px-4 py-2 rounded-full font-semibold text-xs sm:text-base">
+                <Heart className="w-3 h-3 sm:w-4 sm:h-4" />
                 Develops EQ
               </div>
-              <div className="flex items-center gap-2 bg-secondary/10 text-secondary px-4 py-2 rounded-full font-semibold">
-                <Rocket className="w-4 h-4" />
+              <div className="flex items-center gap-2 bg-secondary/10 text-secondary px-3 sm:px-4 py-2 rounded-full font-semibold text-xs sm:text-base">
+                <Rocket className="w-3 h-3 sm:w-4 sm:h-4" />
                 Sparks Creativity
               </div>
             </div>
           </div>
-          <div className="grid lg:grid-cols-5 gap-8 mb-16">
+          
+          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6 sm:gap-8 mb-12 sm:mb-16">
             {lpgccItems.map((item, index) => {
               const IconComponent = item.icon;
               const colorData = colorMap[item.color];
@@ -364,22 +403,19 @@ export default function HomePage() {
                   className="group h-full bg-card border-border hover:shadow-glow transition-smooth"
                 >
                   <CardHeader className="text-center pb-4">
-                    <div className={`w-20 h-20 mx-auto rounded-full ${colorData.bg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-glow`}>
-                      <IconComponent className={`w-10 h-10 ${colorData.text}`} />
+                    <div className={`w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-full ${colorData.bg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-glow`}>
+                      <IconComponent className={`w-8 h-8 sm:w-10 sm:h-10 ${colorData.text}`} />
                     </div>
-                    <CardTitle className="text-2xl font-bold group-hover:text-primary transition-smooth">
+                    <CardTitle className="text-xl sm:text-2xl font-bold group-hover:text-primary transition-smooth">
                       {item.title}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="text-center space-y-4">
-                    <p className="text-muted-foreground font-medium leading-relaxed">
+                    <p className="text-sm sm:text-base text-muted-foreground font-medium leading-relaxed">
                       {item.description}
                     </p>
-                    {/* <p className="text-sm text-muted-foreground leading-relaxed">
-                      {item.detail}
-                    </p> */}
                     <div className="space-y-2">
-                      <h4 className="font-semibold text-sm text-foreground">Key Features:</h4>
+                      <h4 className="font-semibold text-xs sm:text-sm text-foreground">Key Features:</h4>
                       <ul className="text-xs text-muted-foreground space-y-1">
                         {item.benefits.map((benefit, i) => (
                           <li key={i} className="flex items-center gap-1 justify-center">
@@ -394,51 +430,52 @@ export default function HomePage() {
               );
             })}
           </div>
-          <div className="bg-blue-50 rounded-lg p-8 md:p-12 mb-12">
-            <div className="grid md:grid-cols-2 gap-8 items-center">
-              <div className="space-y-6">
-                <h3 className="text-3xl font-bold text-foreground">
+          
+          <div className="bg-blue-50 rounded-lg p-6 sm:p-8 md:p-12 mb-8 sm:mb-12">
+            <div className="grid md:grid-cols-2 gap-6 sm:gap-8 items-center">
+              <div className="space-y-4 sm:space-y-6">
+                <h3 className="text-2xl sm:text-3xl font-bold text-foreground">
                   Why <span className="text-secondary">LPGCC</span> Works
                 </h3>
-                <div className="space-y-4 text-muted-foreground">
+                <div className="space-y-4 text-muted-foreground text-sm sm:text-base">
                   <p className="leading-relaxed">
                     Traditional education focuses only on knowledge transfer. LPGCC integrates
                     emotional intelligence, creativity, and real-world application for holistic growth.
                   </p>
                   <p className="leading-relaxed">
                     Each component builds on the others: <strong>Learn</strong> provides foundation,
-                    <strong>Play</strong> reinforces engagement, <strong>Grow</strong> builds character,
-                    <strong>Create</strong> applies knowledge, and <strong>Connect</strong> fosters community.
+                    <strong> Play</strong> reinforces engagement, <strong> Grow</strong> builds character,
+                    <strong> Create</strong> applies knowledge, and <strong> Connect</strong> fosters community.
                   </p>
                 </div>
               </div>
             </div>
           </div>
-          <div className="text-center space-y-6">
-            <h3 className="text-2xl md:text-3xl font-bold text-primary">
+          
+          <div className="text-center space-y-4 sm:space-y-6">
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-primary">
               Ready to Transform Your Learning?
             </h3>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
               Join a community mastering AI and business through interactive challenges.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button className="group bg-gradient-primary hover:bg-gradient-secondary text-primary-foreground px-6 py-4 rounded-full text-lg font-semibold transition-smooth">
+              <Button className="group bg-gradient-primary hover:bg-gradient-secondary text-primary-foreground px-6 py-4 rounded-full text-base sm:text-lg font-semibold transition-smooth">
                 <Link href="/auth/sign-up" className="flex items-center">
                   Join Now
                   <Rocket className="w-5 h-5 ml-2 group-hover:animate-pulse-fun" />
                 </Link>
               </Button>
-      
             </div>
           </div>
         </div>
       </section>
 
       {/* Courses Section */}
-      <section id="courses" className="py-16 px-6 bg-card">
+      <section id="courses" className="py-12 sm:py-16 px-4 sm:px-6 bg-card">
         <div className="container mx-auto max-w-5xl">
-          <h2 className="text-3xl md:text-4xl font-extrabold text-center text-primary mb-12">Our Courses</h2>
-          <div className="grid md:grid-cols-2 gap-8">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-center text-primary mb-8 sm:mb-12">Our Courses</h2>
+          <div className="grid sm:grid-cols-2 gap-6 sm:gap-8">
             {[
               { title: "AI Essentials", desc: "Learn AI fundamentals through engaging challenges.", icon: Brain },
               { title: "Entrepreneurship 101", desc: "Master business skills with real-world scenarios.", icon: Rocket },
@@ -448,11 +485,11 @@ export default function HomePage() {
               return (
                 <Card key={index} className="bg-card border-border shadow-card hover:shadow-glow transition-smooth">
                   <CardHeader>
-                    <div className="w-14 h-14 bg-accent rounded-lg flex items-center justify-center mb-4 mx-auto">
-                      <IconComponent className="h-8 w-8 text-accent-foreground" />
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-accent rounded-lg flex items-center justify-center mb-4 mx-auto">
+                      <IconComponent className="h-6 w-6 sm:h-8 sm:w-8 text-accent-foreground" />
                     </div>
-                    <CardTitle className="text-xl font-bold text-primary text-center">{course.title}</CardTitle>
-                    <p className="text-muted-foreground text-center font-medium">{course.desc}</p>
+                    <CardTitle className="text-lg sm:text-xl font-bold text-primary text-center">{course.title}</CardTitle>
+                    <p className="text-sm sm:text-base text-muted-foreground text-center font-medium">{course.desc}</p>
                   </CardHeader>
                   <CardContent className="text-center">
                     
@@ -465,21 +502,21 @@ export default function HomePage() {
       </section>
 
       {/* About Section */}
-      <section id="about" className="py-24 ">
-        <div className="container mx-auto px-4">
-          <div className="text-center space-y-8 mb-16">
-            <h2 className="text-4xl md:text-6xl font-black">
+      <section id="about" className="py-12 sm:py-24">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="text-center space-y-6 sm:space-y-8 mb-12 sm:mb-16">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black">
               About <span className="text-primary/30">bloolabb</span>
             </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
               Born from a vision to revolutionize education and prepare the next generation for tomorrow's challenges
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
-              <h3 className="text-3xl md:text-4xl font-bold text-primary">Our Founder's Journey</h3>
-              <div className="space-y-4 text-muted-foreground">
+          <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 items-center mb-12 sm:mb-16">
+            <div className="space-y-4 sm:space-y-6">
+              <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary">Our Founder's Journey</h3>
+              <div className="space-y-4 text-muted-foreground text-sm sm:text-base">
                 <p>
                   <strong className="text-foreground">Mohamed Zouari</strong> founded bloolabb after witnessing the gap between traditional education and the skills needed for the future.
                 </p>
@@ -491,41 +528,41 @@ export default function HomePage() {
                 </p>
               </div>
             </div>
-            <Card className="p-8 bg-card border-border shadow-card hover:shadow-glow transition-smooth">
+            <Card className="p-6 sm:p-8 bg-card border-border shadow-card hover:shadow-glow transition-smooth">
               <div className="text-center space-y-4">
-                <div className="w-24 h-24 mx-auto rounded-full bg-gradient-primary flex items-center justify-center text-primary-foreground text-2xl font-bold">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-full bg-gradient-primary flex items-center justify-center text-primary-foreground text-xl sm:text-2xl font-bold">
                   MZ
                 </div>
-                <h3 className="text-xl font-bold text-primary">Mohamed Zouari</h3>
-                <p className="text-muted-foreground">Founder & CEO</p>
-                <p className="text-sm italic text-muted-foreground">"AI is the new literacy. Teaching your kid AI means preparing them to shape the future.”"</p>
+                <h3 className="text-lg sm:text-xl font-bold text-primary">Mohamed Zouari</h3>
+                <p className="text-sm sm:text-base text-muted-foreground">Founder & CEO</p>
+                <p className="text-xs sm:text-sm italic text-muted-foreground">"AI is the new literacy. Teaching your kid AI means preparing them to shape the future."</p>
               </div>
             </Card>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 mt-16">
-            <Card className="p-8 bg-card border-border shadow-card hover:shadow-glow transition-smooth">
-              <CardHeader className="text-center">
-                <div className="w-16 h-16 mx-auto rounded-full bg-gradient-primary flex items-center justify-center mb-4">
-                  <Sparkles className="w-8 h-8 text-primary-foreground" />
+          <div className="grid sm:grid-cols-2 gap-6 sm:gap-8">
+            <Card className="p-6 sm:p-8 bg-card border-border shadow-card hover:shadow-glow transition-smooth">
+              <CardHeader className="text-center p-0 mb-4">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto rounded-full bg-gradient-primary flex items-center justify-center mb-4">
+                  <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-primary-foreground" />
                 </div>
-                <CardTitle className="text-2xl text-primary">Our Mission</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl text-primary">Our Mission</CardTitle>
               </CardHeader>
-              <CardContent className="text-center">
-                <p className="text-muted-foreground leading-relaxed">
+              <CardContent className="text-center p-0">
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
                   To empower learners with essential AI, business, and life skills through our innovative LPGCC methodology, creating confident, creative, and future-ready leaders.
                 </p>
               </CardContent>
             </Card>
-            <Card className="p-8 bg-card border-border shadow-card hover:shadow-glow transition-smooth">
-              <CardHeader className="text-center">
-                <div className="w-16 h-16 mx-auto rounded-full bg-gradient-secondary flex items-center justify-center mb-4">
-                  <Globe className="w-8 h-8 text-secondary-foreground" />
+            <Card className="p-6 sm:p-8 bg-card border-border shadow-card hover:shadow-glow transition-smooth">
+              <CardHeader className="text-center p-0 mb-4">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto rounded-full bg-gradient-secondary flex items-center justify-center mb-4">
+                  <Globe className="w-6 h-6 sm:w-8 sm:h-8 text-secondary-foreground" />
                 </div>
-                <CardTitle className="text-2xl text-primary">Our Vision</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl text-primary">Our Vision</CardTitle>
               </CardHeader>
-              <CardContent className="text-center">
-                <p className="text-muted-foreground leading-relaxed">
+              <CardContent className="text-center p-0">
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
                   To become the leading EdTech platform globally, starting in Tunisia and expanding to UAE and beyond, transforming how learners prepare for tomorrow's economy.
                 </p>
               </CardContent>
@@ -535,13 +572,13 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 px-6 bg-gradient-primary text-primary-foreground">
+      <section className="py-12 sm:py-16 px-4 sm:px-6 bg-gradient-primary text-primary-foreground">
         <div className="container mx-auto text-center max-w-4xl">
-          <h2 className="text-3xl md:text-4xl font-extrabold mb-6">Ready to Start Your Journey?</h2>
-          <p className="text-lg mb-8 font-medium">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-4 sm:mb-6">Ready to Start Your Journey?</h2>
+          <p className="text-base sm:text-lg mb-6 sm:mb-8 font-medium px-4">
             Join a vibrant community mastering AI and business through interactive experiences.
           </p>
-          <Button className="bg-secondary hover:bg-card hover:text-primary px-8 py-4 rounded-full font-semibold text-lg transition-smooth">
+          <Button className="bg-secondary hover:bg-card hover:text-primary px-6 sm:px-8 py-4 rounded-full font-semibold text-base sm:text-lg transition-smooth">
             <Link href="/auth/sign-up" className="flex items-center">
               Get Started <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
@@ -550,46 +587,52 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-muted py-12 px-6 border-t border-border">
+      <footer className="bg-muted py-8 sm:py-12 px-4 sm:px-6 border-t border-border">
         <div className="container mx-auto max-w-5xl">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
+            <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
                   <Sparkles className="h-5 w-5 text-primary-foreground" />
                 </div>
                 <span className="text-xl font-extrabold text-primary">bloolabb</span>
               </div>
-              <p className="text-muted-foreground text-sm font-medium">Empowering learners with AI and business education through interactive challenges.</p>
+              <p className="text-muted-foreground text-xs sm:text-sm font-medium">Empowering learners with AI and business education through interactive challenges.</p>
             </div>
             <div>
-              <h3 className="font-bold text-primary mb-4">Explore</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
+              <h3 className="font-bold text-primary mb-3 sm:mb-4 text-sm sm:text-base">Explore</h3>
+              <ul className="space-y-2 text-xs sm:text-sm text-muted-foreground">
                 <li><Link href="/features" className="hover:text-secondary font-medium transition-smooth">Features</Link></li>
                 <li><Link href="/courses" className="hover:text-secondary font-medium transition-smooth">Courses</Link></li>
                 <li><Link href="/about" className="hover:text-secondary font-medium transition-smooth">About</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-bold text-primary mb-4">Support</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
+              <h3 className="font-bold text-primary mb-3 sm:mb-4 text-sm sm:text-base">Support</h3>
+              <ul className="space-y-2 text-xs sm:text-sm text-muted-foreground">
                 <li><Link href="/help" className="hover:text-secondary font-medium transition-smooth">Help Center</Link></li>
                 <li><Link href="/contact" className="hover:text-secondary font-medium transition-smooth">Contact Us</Link></li>
               </ul>
             </div>
             <div>
-              <h3 className="font-bold text-primary mb-4">Company</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
+              <h3 className="font-bold text-primary mb-3 sm:mb-4 text-sm sm:text-base">Company</h3>
+              <ul className="space-y-2 text-xs sm:text-sm text-muted-foreground">
                 <li><Link href="/about" className="hover:text-secondary font-medium transition-smooth">About Us</Link></li>
                 <li><Link href="/privacy" className="hover:text-secondary font-medium transition-smooth">Privacy Policy</Link></li>
               </ul>
             </div>
           </div>
-          <div className="mt-8 text-center text-sm text-muted-foreground font-medium">
+          <div className="mt-6 sm:mt-8 text-center text-xs sm:text-sm text-muted-foreground font-medium">
             <p>&copy; 2025 bloolabb. All rights reserved.</p>
           </div>
         </div>
       </footer>
+
+      <RegistrationForm
+        isOpen={showRegistrationForm}
+        onClose={() => setShowRegistrationForm(false)}
+        planType={selectedPlan || ""}
+      />
     </div>
   );
 }
