@@ -35,7 +35,7 @@ export function LearningTracksOverview({ tracks, progressData }: LearningTracksO
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Sparkles className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+            <h2 className="text-3xl font-bold bg-linear-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
               Learning Paths
             </h2>
           </div>
@@ -43,7 +43,7 @@ export function LearningTracksOverview({ tracks, progressData }: LearningTracksO
             Choose your adventure and unlock new skills
           </p>
         </div>
-        <Button asChild className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg hover:shadow-xl transition-all duration-300">
+        <Button asChild className="bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg hover:shadow-xl transition-all duration-300">
           <Link href="/learn" className="flex items-center gap-2">
             Explore All
             <ArrowRight className="h-4 w-4" />
@@ -70,13 +70,13 @@ export function LearningTracksOverview({ tracks, progressData }: LearningTracksO
               `}
             >
               {/* Animated background */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${color.from} ${color.to} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}></div>
+              <div className={`absolute inset-0 bg-linear-to-br ${color.from} ${color.to} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}></div>
               
               <CardHeader className="pb-4 relative z-10">
                 <div className="flex items-start gap-4">
                   <div className={`
                     p-4 rounded-2xl shadow-lg transition-all duration-500 group-hover:scale-110
-                    bg-gradient-to-r ${color.from} ${color.to}
+                    bg-linear-to-r ${color.from} ${color.to}
                   `}>
                     <div className="text-xl text-white">
                       {track.icon || (isCompleted ? '🎯' : '📚')}
@@ -107,13 +107,13 @@ export function LearningTracksOverview({ tracks, progressData }: LearningTracksO
                   <div className="relative">
                     <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
                       <div 
-                        className={`h-3 rounded-full bg-gradient-to-r ${color.from} ${color.to} shadow-sm transition-all duration-1000 ease-out`}
+                        className={`h-3 rounded-full bg-linear-to-r ${color.from} ${color.to} shadow-sm transition-all duration-1000 ease-out`}
                         style={{ width: `${progress}%` }}
                       />
                     </div>
                     {isCompleted && (
                       <div className="absolute -top-1 -right-1">
-                        <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center shadow-lg">
+                        <div className="bg-linear-to-r from-green-500 to-emerald-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center shadow-lg">
                           ✓
                         </div>
                       </div>
@@ -142,7 +142,7 @@ export function LearningTracksOverview({ tracks, progressData }: LearningTracksO
                     size="sm"
                     className={`
                       font-semibold shadow-md hover:shadow-lg transition-all duration-300
-                      bg-gradient-to-r ${color.from} ${color.to} hover:scale-105
+                      bg-linear-to-r ${color.from} ${color.to} hover:scale-105
                     `}
                   >
                     <Link href={`/learn/${track.id}`} className="flex items-center gap-1">

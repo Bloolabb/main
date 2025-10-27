@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import Link from "next/link"
+import { BookOpen, Target, Sparkles } from "lucide-react"
 
 interface LearningTrackCardProps {
   track: any
@@ -12,47 +13,70 @@ export function LearningTrackCard({ track, userProgress }: LearningTrackCardProp
   const totalLessons = track.modules?.reduce((acc: number, module: any) => acc + (module.lessons?.length || 0), 0) || 0
   const completedLessons = userProgress.filter((p) => p.completed).length
   const progressPercent = totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0
-
-  const isAI = track.title.includes("AI")
-  const cardColor = isAI ? "from-blue-500 to-purple-600" : "from-green-500 to-teal-600"
-  const buttonColor = isAI ? "bg-blue-500 hover:bg-blue-600" : "bg-green-500 hover:bg-green-600"
+  const isCompleted = completedLessons === totalLessons && totalLessons > 0
 
   return (
-    <Card className="border-2 border-gray-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-      <CardHeader className={`bg-gradient-to-r ${cardColor} text-white rounded-t-lg`}>
-        <div className="flex items-center space-x-4">
-          <div className="text-4xl">{track.icon}</div>
-          <div className="flex-1">
-            <CardTitle className="text-2xl font-bold">{track.title}</CardTitle>
-            <p className="text-blue-100 mt-2">{track.description}</p>
+    <Card className="border border-gray-200 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300 hover:border-purple-200">
+      <CardHeader className="pb-4">
+        <div className="flex items-start space-x-4">
+          <div className={`p-3 rounded-2xl ${isCompleted ? 'bg-linear-to-r from-purple-500 to-blue-500' : 'bg-gray-100'} transition-colors`}>
+            <div className="text-2xl">
+              {track.icon || '📚'}
+            </div>
+          </div>
+          <div className="flex-1 min-w-0">
+            <CardTitle className="text-xl text-gray-900 flex items-center gap-2">
+              {track.title}
+              {isCompleted && <Sparkles className="h-5 w-5 text-amber-500" />}
+            </CardTitle>
+            <p className="text-gray-600 text-sm mt-2 line-clamp-2">
+              {track.description}
+            </p>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="p-6 space-y-6">
+      
+      <CardContent className="space-y-4">
         <div className="space-y-3">
-          <div className="flex justify-between items-center">
-            <span className="text-sm font-medium text-gray-600">Progress</span>
-            <span className="text-sm font-bold text-gray-800">
-              {completedLessons} / {totalLessons} lessons
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-600 font-medium">Progress</span>
+            <span className="font-semibold text-gray-800">
+              {completedLessons}/{totalLessons} lessons
             </span>
           </div>
-          <Progress value={progressPercent} className="h-3" />
-          <div className="text-center text-sm text-gray-600">{Math.round(progressPercent)}% Complete</div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div 
+              className={`h-2 rounded-full transition-all duration-1000 ${
+                isCompleted ? 'bg-linear-to-r from-purple-500 to-blue-500' : 'bg-linear-to-r from-blue-500 to-cyan-500'
+              }`}
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 text-center">
-          <div className="p-3 bg-gray-50 rounded-lg">
-            <div className="text-2xl font-bold text-gray-800">{track.modules?.length || 0}</div>
+        <div className="grid grid-cols-2 gap-3 text-center">
+          <div className="p-3 bg-gray-50 rounded-lg border border-gray-100">
+            <div className="text-lg font-bold text-gray-800">{track.modules?.length || 0}</div>
             <div className="text-xs text-gray-600">Modules</div>
           </div>
-          <div className="p-3 bg-gray-50 rounded-lg">
-            <div className="text-2xl font-bold text-gray-800">{totalLessons}</div>
+          <div className="p-3 bg-gray-50 rounded-lg border border-gray-100">
+            <div className="text-lg font-bold text-gray-800">{totalLessons}</div>
             <div className="text-xs text-gray-600">Lessons</div>
           </div>
         </div>
 
-        <Button asChild className={`w-full h-12 text-lg font-semibold ${buttonColor}`}>
-          <Link href={`/learn/${track.id}`}>{completedLessons > 0 ? "Continue Learning" : "Start Learning"}</Link>
+        <Button 
+          asChild 
+          className={`w-full font-semibold transition-all ${
+            isCompleted 
+              ? 'bg-linear-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600' 
+              : 'bg-linear-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600'
+          }`}
+        >
+          <Link href={`/learn/${track.id}`} className="flex items-center justify-center gap-2">
+            {isCompleted ? 'Review' : completedLessons > 0 ? 'Continue' : 'Start Learning'}
+            <BookOpen className="h-4 w-4" />
+          </Link>
         </Button>
       </CardContent>
     </Card>

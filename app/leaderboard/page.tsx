@@ -41,7 +41,7 @@ export default async function LeaderboardPage() {
 
   return (
     <DashboardLayout user={data.user} profile={profile}>
-      <div className="space-y-6">
+      <div className="space-y-8 p-6">
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold text-gray-800">Leaderboard</h1>
           <p className="text-lg text-gray-600">See how you rank against other learners!</p>

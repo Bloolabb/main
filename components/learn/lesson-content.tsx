@@ -3,8 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { ArrowLeft, ArrowRight, BookOpen } from "lucide-react"
+import { ArrowLeft, ArrowRight, BookOpen, Play } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
@@ -29,21 +28,18 @@ export function LessonContent({ lesson, userProgress, allLessons, trackId, modul
   const lessonSteps = [
     {
       type: "intro",
-      title: "Lesson Introduction",
-      content: `Welcome to "${lesson.title}"! ${lesson.description || "Let's dive into this exciting topic."}`,
-      videoUrl: null,
+      title: "Getting Started",
+      content: `Welcome to "${lesson.title}"! ${lesson.description || "Let's begin your learning journey."}`,
     },
     {
       type: "content",
       title: lesson.title,
       content: generateLessonContent(lesson),
-      videoUrl: lesson.youtube_url || null, // Add YouTube URL here
     },
     {
       type: "summary",
-      title: "Lesson Summary",
-      content: `Great job completing "${lesson.title}"! You've earned ${lesson.xp_reward} XP. Ready to test your knowledge?`,
-      videoUrl: null,
+      title: "Ready to Practice",
+      content: `Great work! You've completed the lesson content. Ready to test your knowledge with some exercises?`,
     },
   ]
 
@@ -65,17 +61,17 @@ export function LessonContent({ lesson, userProgress, allLessons, trackId, modul
   const progressPercent = ((currentStep + 1) / lessonSteps.length) * 100
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6 p-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <Button asChild variant="ghost" className="text-gray-600 hover:text-gray-800">
-          <Link href={`/learn/${trackId}/${moduleId}`} className="flex items-center space-x-2">
+          <Link href={`/learn/${trackId}/${moduleId}`} className="flex items-center gap-2">
             <ArrowLeft className="h-4 w-4" />
             <span>Back to Module</span>
           </Link>
         </Button>
 
-        <div className="flex items-center space-x-2 text-sm text-gray-600">
+        <div className="flex items-center gap-2 text-sm text-gray-600">
           <BookOpen className="h-4 w-4" />
           <span>{lesson.modules?.learning_tracks?.title}</span>
         </div>
@@ -89,24 +85,22 @@ export function LessonContent({ lesson, userProgress, allLessons, trackId, modul
             {currentStep + 1} of {lessonSteps.length}
           </span>
         </div>
-        <Progress value={progressPercent} className="h-2" />
+        <div className="w-full bg-gray-200 rounded-full h-2">
+          <div 
+            className="h-2 rounded-full bg-linear-to-r from-blue-500 to-cyan-500 transition-all duration-500"
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
       </div>
 
       {/* Content */}
-      <Card className="border-2 border-gray-100 shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
-          <CardTitle className="text-2xl">{lessonSteps[currentStep].title}</CardTitle>
+      <Card className="border border-gray-200 shadow-sm">
+        <CardHeader className="pb-4 border-b border-gray-100">
+          <CardTitle className="text-2xl text-gray-900">{lessonSteps[currentStep].title}</CardTitle>
         </CardHeader>
-        <CardContent className="p-8">
-          <div className="prose prose-lg max-w-none">
-            {/* YouTube Video - Only show on content step if video exists */}
-            {currentStep === 1 && lessonSteps[currentStep].videoUrl && (
-              <YouTubeVideo url={lessonSteps[currentStep].videoUrl} />
-            )}
-            
-            <div className="text-gray-700 leading-relaxed whitespace-pre-line">
-              {lessonSteps[currentStep].content}
-            </div>
+        <CardContent className="p-6">
+          <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
+            {lessonSteps[currentStep].content}
           </div>
         </CardContent>
       </Card>
@@ -117,24 +111,26 @@ export function LessonContent({ lesson, userProgress, allLessons, trackId, modul
           onClick={handlePrev}
           disabled={currentStep === 0}
           variant="outline"
-          className="flex items-center space-x-2 bg-transparent"
+          className="flex items-center gap-2 border-gray-300 text-gray-700"
         >
           <ArrowLeft className="h-4 w-4" />
           <span>Previous</span>
         </Button>
 
-        <div className="flex space-x-2">
+        <div className="flex gap-1">
           {lessonSteps.map((_, index) => (
             <div
               key={index}
-              className={`w-3 h-3 rounded-full ${index <= currentStep ? "bg-blue-500" : "bg-gray-200"}`}
+              className={`w-2 h-2 rounded-full transition-colors ${
+                index <= currentStep ? "bg-blue-500" : "bg-gray-300"
+              }`}
             />
           ))}
         </div>
 
         <Button
           onClick={handleNext}
-          className="flex items-center space-x-2 bg-blue-500 hover:bg-blue-600"
+          className="flex items-center gap-2 bg-linear-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 font-medium"
           disabled={isLoading}
         >
           <span>
@@ -146,22 +142,26 @@ export function LessonContent({ lesson, userProgress, allLessons, trackId, modul
 
       {/* Lesson Navigation */}
       {currentStep === lessonSteps.length - 1 && (
-        <div className="flex justify-between pt-4 border-t border-gray-200">
+        <div className="flex justify-between pt-6 border-t border-gray-200">
           {prevLesson ? (
-            <Button asChild variant="outline">
-              <Link href={`/learn/${trackId}/${moduleId}/${prevLesson.id}`}>← Previous Lesson: {prevLesson.title}</Link>
+            <Button asChild variant="outline" className="border-gray-300 text-gray-700">
+              <Link href={`/learn/${trackId}/${moduleId}/${prevLesson.id}`}>
+                ← {prevLesson.title}
+              </Link>
             </Button>
           ) : (
             <div />
           )}
 
           {nextLesson ? (
-            <Button asChild>
-              <Link href={`/learn/${trackId}/${moduleId}/${nextLesson.id}`}>Next Lesson: {nextLesson.title} →</Link>
+            <Button asChild className="bg-linear-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600">
+              <Link href={`/learn/${trackId}/${moduleId}/${nextLesson.id}`}>
+                {nextLesson.title} →
+              </Link>
             </Button>
           ) : (
-            <Button asChild>
-              <Link href={`/learn/${trackId}/${moduleId}`}>Back to Module</Link>
+            <Button asChild variant="outline" className="border-gray-300 text-gray-700">
+              <Link href={`/learn/${trackId}/${moduleId}`}>Finish Module</Link>
             </Button>
           )}
         </div>
@@ -170,44 +170,7 @@ export function LessonContent({ lesson, userProgress, allLessons, trackId, modul
   )
 }
 
-// YouTube Video Component
-function YouTubeVideo({ url }: { url: string }) {
-  return (
-    <div className="mb-6">
-      <div className="video-container">
-        <iframe
-          src={url}
-          title="YouTube video player"
-          frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-          className="w-full h-full rounded-lg"
-        ></iframe>
-      </div>
-      <style jsx>{`
-        .video-container {
-          position: relative;
-          padding-bottom: 56.25%; /* 16:9 aspect ratio */
-          height: 0;
-          overflow: hidden;
-          border-radius: 0.5rem;
-          background: #000;
-        }
-        .video-container iframe {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          border-radius: 0.5rem;
-        }
-      `}</style>
-    </div>
-  )
-}
-
 function generateLessonContent(lesson: any): string {
-  // Generate educational content based on lesson title
   const aiLessons: Record<string, string> = {
     "AI Definition": `Artificial Intelligence (AI) is the simulation of human intelligence in machines that are programmed to think and learn like humans. 
 

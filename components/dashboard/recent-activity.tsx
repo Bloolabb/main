@@ -27,7 +27,7 @@ export function RecentActivity({ progressData }: RecentActivityProps) {
 
   if (recentLessons.length === 0) {
     return (
-      <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20">
+      <Card className="border-0 shadow-lg bg-linear-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20">
         <CardHeader>
           <CardTitle className="text-xl text-gray-900 dark:text-white flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-purple-600" />
@@ -36,14 +36,14 @@ export function RecentActivity({ progressData }: RecentActivityProps) {
         </CardHeader>
         <CardContent>
           <div className="text-center py-8 space-y-4">
-            <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto shadow-lg">
+            <div className="w-16 h-16 bg-linear-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto shadow-lg">
               <Sparkles className="h-8 w-8 text-white" />
             </div>
             <div className="space-y-2">
               <p className="text-gray-700 dark:text-gray-300 font-medium">Your learning journey begins here!</p>
               <p className="text-sm text-gray-500 dark:text-gray-400">Complete your first lesson to see activity here.</p>
             </div>
-            <Button asChild className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg">
+            <Button asChild className="bg-linear-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg">
               <Link href="/learn" className="flex items-center gap-2">
                 <BookOpen className="h-4 w-4" />
                 Start Learning
@@ -69,10 +69,10 @@ export function RecentActivity({ progressData }: RecentActivityProps) {
           {recentLessons.map((lesson, index) => (
             <div 
               key={index} 
-              className="flex items-center gap-4 p-4 bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-700 rounded-2xl border border-gray-200 dark:border-gray-600 hover:shadow-md transition-all duration-300 group"
+              className="flex items-center gap-4 p-4 bg-linear-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-700 rounded-2xl border border-gray-200 dark:border-gray-600 hover:shadow-md transition-all duration-300 group"
             >
               <div className="relative">
-                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <div className="w-12 h-12 bg-linear-to-r from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
                   <CheckCircle2 className="h-6 w-6 text-white" />
                 </div>
                 <div className="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center">

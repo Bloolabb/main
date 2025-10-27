@@ -98,7 +98,7 @@ export function UserStats({ profile }: UserStatsProps) {
             
             <CardContent className="p-6">
               <div className="flex flex-col items-center text-center space-y-4">
-                <div className={`p-3 rounded-2xl bg-gradient-to-r ${stat.color} shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                <div className={`p-3 rounded-2xl bg-linear-to-r ${stat.color} shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                   <Icon className="h-6 w-6 text-white" />
                 </div>
                 
@@ -106,7 +106,7 @@ export function UserStats({ profile }: UserStatsProps) {
                   <div className="text-2xl font-bold text-gray-900 dark:text-white">
                     {stat.value}
                   </div>
-                  <div className={`text-sm font-semibold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                  <div className={`text-sm font-semibold bg-linear-to-r ${stat.color} bg-clip-text text-transparent`}>
                     {stat.title}
                   </div>
                 </div>
@@ -120,7 +120,7 @@ export function UserStats({ profile }: UserStatsProps) {
             </CardContent>
 
             {/* Hover effect overlay */}
-            <div className={`absolute inset-0 bg-gradient-to-r ${stat.color} opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-2xl`}></div>
+            <div className={`absolute inset-0 bg-linear-to-r ${stat.color} opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-2xl`}></div>
           </Card>
         )
       })}

@@ -43,7 +43,7 @@ export default async function LearnPage() {
 
   return (
     <DashboardLayout user={data.user} profile={profile}>
-      <div className="space-y-6">
+      <div className="space-y-8 p-6">
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold text-gray-800">Choose Your Learning Path</h1>
           <p className="text-lg text-gray-600">Master AI and Entrepreneurship with interactive lessons</p>

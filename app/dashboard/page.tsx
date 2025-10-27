@@ -45,7 +45,7 @@ export default async function DashboardPage() {
     <DashboardLayout user={data.user} profile={profile}>
       <div className="space-y-8 p-6">
         {/* Magical Header Section */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 rounded-3xl p-8 text-white shadow-2xl">
+        <div className="relative overflow-hidden bg-linear-to-br from-gray-900 via-purple-900 to-blue-900 rounded-3xl p-8 text-white shadow-2xl">
           {/* Animated background elements */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full -translate-y-32 translate-x-32"></div>
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-500/10 rounded-full -translate-x-24 translate-y-24"></div>
@@ -65,7 +65,7 @@ export default async function DashboardPage() {
                   <div className="p-2 bg-white/20 backdrop-blur-sm rounded-2xl border border-white/30">
                     <Sparkles className="h-6 w-6 text-amber-300" />
                   </div>
-                  <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-amber-200 bg-clip-text text-transparent">
+                  <h1 className="text-4xl font-bold bg-linear-to-r from-white to-amber-200 bg-clip-text text-transparent">
                     Welcome back, {profile?.display_name || "Learner"}! ✨
                   </h1>
                 </div>
@@ -111,11 +111,11 @@ export default async function DashboardPage() {
               {/* Rocket Illustration */}
               <div className="hidden lg:flex items-center justify-center relative">
                 <div className="relative">
-                  <div className="w-24 h-24 bg-gradient-to-br from-amber-400 to-orange-500 rounded-3xl flex items-center justify-center shadow-2xl rotate-12 group hover:rotate-0 transition-transform duration-500">
+                  <div className="w-24 h-24 bg-linear-to-br from-amber-400 to-orange-500 rounded-3xl flex items-center justify-center shadow-2xl rotate-12 group hover:rotate-0 transition-transform duration-500">
                     <Rocket className="h-12 w-12 text-white transform -rotate-12 group-hover:rotate-0 transition-transform duration-500" />
                   </div>
                   {/* Rocket trail */}
-                  <div className="absolute -bottom-4 -left-4 w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-full blur-sm opacity-60 animate-pulse"></div>
+                  <div className="absolute -bottom-4 -left-4 w-8 h-8 bg-linear-to-r from-orange-500 to-red-500 rounded-full blur-sm opacity-60 animate-pulse"></div>
                 </div>
               </div>
             </div>
