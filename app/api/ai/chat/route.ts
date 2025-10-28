@@ -31,6 +31,59 @@ function appendConversation(conversationId: string, role: 'user' | 'assistant', 
   conversationCache.set(conversationId, record)
 }
 
+// NEW: Function to get user context similar to dashboard
+async function getUserContext(userId: string) {
+  const supabase = await createClient()
+  
+  // Get user profile and stats (same as dashboard)
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", userId)
+    .single()
+
+  // Get learning progress summary
+  const { data: progressData } = await supabase
+    .from("user_progress")
+    .select(`
+      *,
+      lessons!inner(
+        *,
+        modules!inner(
+          *,
+          learning_tracks!inner(*)
+        )
+      )
+    `)
+    .eq("user_id", userId)
+    .eq("completed", true)
+
+  // Get learning tracks
+  const { data: tracks } = await supabase
+    .from("learning_tracks")
+    .select("*")
+    .order("order_index")
+
+  // Calculate stats (same as dashboard)
+  const completedLessons = progressData?.length || 0
+  const totalTracks = tracks?.length || 0
+  const userLevel = profile?.total_xp ? Math.floor(profile.total_xp / 100) + 1 : 1
+  const currentStreak = profile?.current_streak || 0
+
+  // Get recent completed lessons for context
+  const recentLessons = progressData?.slice(-3).map(p => p.lessons?.title).filter(Boolean) || []
+
+  return {
+    displayName: profile?.display_name || "Learner",
+    completedLessons,
+    totalTracks,
+    userLevel,
+    currentStreak,
+    totalXP: profile?.total_xp || 0,
+    recentLessons,
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
@@ -50,6 +103,9 @@ export async function POST(request: NextRequest) {
     if (message.length > 500) {
       return NextResponse.json({ error: "Message too long" }, { status: 400 })
     }
+
+    // NEW: Get user context before processing the message
+    const userContext = await getUserContext(user.id)
 
     // Memory: Get or create conversation ID
     const conversationId = incomingConversationId || generateConversationId()
@@ -82,22 +138,22 @@ export async function POST(request: NextRequest) {
 
     const usage = heartUsage[0]
 
-    // 2️⃣ Call AI API with memory context
+    // 2️⃣ Call AI API with memory context AND user context
     let aiResponse: string
     let usedModel = 'unknown'
     
     try {
-      aiResponse = await callOpenRouterAPI(message, history, isContinuation)
+      aiResponse = await callOpenRouterAPI(message, history, isContinuation, userContext)
       usedModel = 'openrouter'
     } catch (err) {
       console.error('OpenRouter failed:', err)
       try {
-        aiResponse = await callGeminiAPI(message, history, isContinuation)
+        aiResponse = await callGeminiAPI(message, history, isContinuation, userContext)
         usedModel = 'gemini'
       } catch (geminiErr) {
         console.error('Gemini also failed:', geminiErr)
-        // Fallback response
-        aiResponse = `I understand you're asking about "${message}". As your AI tutor, I'd love to help you learn more about this topic! This is a great question for exploring new ideas. 🧠✨`
+        // Fallback response with user context
+        aiResponse = getFallbackResponse(message, userContext)
         usedModel = 'fallback'
       }
     }
@@ -146,17 +202,22 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Enhanced OpenRouter call with memory
-async function callOpenRouterAPI(message: string, history: { role: string; content: string }[], isContinuation: boolean): Promise<string> {
+// Enhanced OpenRouter call with memory AND user context
+async function callOpenRouterAPI(
+  message: string, 
+  history: { role: string; content: string }[], 
+  isContinuation: boolean,
+  userContext: any
+): Promise<string> {
   if (!OPENROUTER_API_KEY) {
     throw new Error('OpenRouter API key not configured')
   }
 
-  // Build messages with memory context
+  // Build messages with memory context AND user context
   const messages: any[] = [
     {
       role: "system",
-      content: getSystemPrompt(!isContinuation)
+      content: getEnhancedSystemPrompt(!isContinuation, userContext)
     }
   ]
 
@@ -201,14 +262,19 @@ async function callOpenRouterAPI(message: string, history: { role: string; conte
   return data.choices[0].message.content
 }
 
-// Enhanced Gemini call with memory
-async function callGeminiAPI(message: string, history: { role: string; content: string }[], isContinuation: boolean): Promise<string> {
+// Enhanced Gemini call with memory AND user context
+async function callGeminiAPI(
+  message: string, 
+  history: { role: string; content: string }[], 
+  isContinuation: boolean,
+  userContext: any
+): Promise<string> {
   if (!GEMINI_API_KEY) {
     throw new Error('Gemini API key not configured')
   }
 
-  // Build prompt with memory context
-  const systemPrompt = getSystemPrompt(!isContinuation)
+  // Build prompt with memory context AND user context
+  const systemPrompt = getEnhancedSystemPrompt(!isContinuation, userContext)
   
   let historyText = ''
   if (history && history.length) {
@@ -255,13 +321,29 @@ Respond as the same AI tutor, do not re-introduce yourself if this is a continua
   return data.candidates[0].content.parts[0].text
 }
 
-// System prompt with memory awareness
-function getSystemPrompt(isNewConversation: boolean): string {
-  const securityPrompt = 
-  
+// NEW: Enhanced system prompt with user context
+function getEnhancedSystemPrompt(isNewConversation: boolean, userContext: any): string {
+  const userInfo = `
+STUDENT PROFILE (for personalized tutoring):
+- Name: ${userContext.displayName}
+- Level: ${userContext.userLevel}
+- Completed Lessons: ${userContext.completedLessons}
+- Learning Tracks: ${userContext.totalTracks}
+- Current Streak: ${userContext.currentStreak} days
+- Total XP: ${userContext.totalXP}
+- Recent Lessons: ${userContext.recentLessons.join(', ') || 'None yet'}
 `
+
+  const securityPrompt = `
 you are blooly, an advanced AI tutor designed specifically for children and teenagers to help them learn about AI, technology, business, and entrepreneurship in a safe and engaging manner.
 
+${userInfo}
+
+PERSONALIZATION GUIDELINES:
+- Use the student's progress to tailor explanations (beginner vs advanced)
+- Reference their recent lessons if relevant to current question
+- Celebrate their streak and achievements to motivate them
+- Adjust complexity based on their level and age group
 
 CRITICAL SECURITY & SAFETY PROTOCOLS FOR CHILDREN/TEENS PLATFORM:
 
@@ -304,10 +386,11 @@ EDUCATIONAL APPROACH:
 - Keep responses under 300 words
 - Always maintain a safe, appropriate tone
 - Only ask one question at a time and wait for student responses
-- Never move on until the student responds`
+- Never move on until the student responds
+- Personalize responses based on the student's progress and level`
 
   const intro = isNewConversation 
-    ? "Start by briefly introducing yourself as the AI tutor and ask what the student would like to learn about AI, technology, business, or entrepreneurship."
+    ? `Start by briefly introducing yourself as Blooly, the AI tutor. Acknowledge ${userContext.displayName}'s progress (Level ${userContext.userLevel}, ${userContext.completedLessons} lessons completed) and ask what they'd like to learn about AI, technology, business, or entrepreneurship.`
     : "This is a continuation of an existing conversation. Do NOT re-introduce yourself. Continue from the previous context, maintaining all security protocols."
 
   return `${securityPrompt}\n\n${intro}\n\nREDIRECTION TEMPLATES:
@@ -316,6 +399,16 @@ EDUCATIONAL APPROACH:
 - For personal questions: "I'm designed to be your learning companion. What would you like to learn about today?"
 - For emergency mentions: "I'm an AI tutor for education. If you need help, please speak with a trusted adult immediately."`
 }
+
+// NEW: Fallback response with user context
+function getFallbackResponse(message: string, userContext: any): string {
+  const personalizedGreeting = userContext.completedLessons > 0 
+    ? `I see you've completed ${userContext.completedLessons} lessons and reached Level ${userContext.userLevel}! `
+    : "I'm excited to help you start your learning journey! "
+    
+  return `${personalizedGreeting}You asked about "${message}". As your AI tutor Blooly, I'd love to help you explore this topic! This is a great question for learning more about technology and AI. What specific aspect interests you most? 🧠✨`
+}
+
 // Helper function from first code
 function generateConversationId(): string {
   return `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`

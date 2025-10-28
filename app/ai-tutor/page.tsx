@@ -16,16 +16,11 @@ export default async function AITutorPage() {
 
   return (
     <DashboardLayout user={data.user} profile={profile}>
-      <div className="space-y-8">
+      <div className="">
         {/* Clean Header */}
-        <div className="text-center space-y-4">
-          <div className="flex items-center justify-center gap-3">
-            <Brain className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-800">AI Tutor</h1>
-          </div>
-          
+        <div className="text-center">
           {/* Hero Section matching the image */}
-          <div className="relative w-full mx-auto rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-lg px-8 py-10 my-8">
+          <div className="relative w-full mx-auto rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-lg px-8 py-10">
             {/* Background decoration images */}
             <img
               alt="triangle"
@@ -40,7 +35,7 @@ export default async function AITutorPage() {
             
             <div className="space-y-6 z-10 relative">
               <h2 className="text-center text-2xl sm:text-3xl font-medium leading-tight">
-                With AI Tutor, you learn at your own pace <br />
+                With 🧠 AI Tutor, you learn at your own pace <br />
                 through bite-sized, practical education.
               </h2>
               
@@ -54,12 +49,8 @@ export default async function AITutorPage() {
               </div>
             </div>
           </div>
-
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Get personalized help and explanations from our AI learning assistant
-          </p>
         </div>
-
+        <br />
         {/* AI Tutors Component */}
         <AITutors />
 
