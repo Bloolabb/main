@@ -16,6 +16,7 @@ export default function SignUpPage() {
   const [password, setPassword] = useState("")
   const [displayName, setDisplayName] = useState("")
   const [dateOfBirth, setDateOfBirth] = useState("")
+  const [phoneNumber, setPhoneNumber] = useState("")  // Add phone number state
   const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -64,6 +65,7 @@ export default function SignUpPage() {
           data: {
             display_name: displayName,
             date_of_birth: dateOfBirth,
+            phone_number: phoneNumber  // Add phone number to metadata
           },
         },
       })
@@ -100,6 +102,19 @@ export default function SignUpPage() {
                   required
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
+                  className="h-12 border-2 border-gray-200 focus:border-green-400"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phoneNumber" className="text-sm font-medium text-gray-700">
+                  Phone Number
+                </Label>
+                <Input
+                  id="phoneNumber"
+                  type="tel"
+                  placeholder="Your phone number"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
                   className="h-12 border-2 border-gray-200 focus:border-green-400"
                 />
               </div>
@@ -166,9 +181,9 @@ export default function SignUpPage() {
               <Button
                 type="submit"
                 className="w-full h-12 text-lg bg-green-500 hover:bg-green-600 font-semibold"
-                disabled={isLoading}
+                isLoading={isLoading}
               >
-                {isLoading ? "Creating Account..." : "Create Account"}
+                Create Account
               </Button>
             </form>
             <div className="mt-6 text-center">
