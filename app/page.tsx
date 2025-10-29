@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Brain, Rocket, Sparkles, BookOpen, Globe, Award, ChevronRight, Star, Zap, Lightbulb, Heart, TrendingUp, Palette, Users, Check, Crown, X, Menu } from "lucide-react";
 import { LanguageSelector } from "@/components/language-selector";
 import heroImage from "@/assets/hero-image.webp";
@@ -28,17 +27,17 @@ interface ColorMap {
 // Color mapping for static class names
 const colorMap: ColorMap = {
   primary: {
-    bg: "bg-gradient-primary",
+    bg: "bg-linear-primary",
     text: "text-primary-foreground",
     dot: "bg-primary"
   },
   secondary: {
-    bg: "bg-gradient-secondary", 
+    bg: "bg-linear-secondary", 
     text: "text-secondary-foreground",
     dot: "bg-secondary"
   },
   accent: {
-    bg: "bg-gradient-accent",
+    bg: "bg-linear-accent",
     text: "text-accent-foreground", 
     dot: "bg-accent"
   }
@@ -166,7 +165,7 @@ export default function HomePage() {
             <Link href="#courses" className="text-foreground hover:text-secondary font-semibold transition-smooth text-sm lg:text-base">
               Courses
             </Link>
-            <Link href="#about" className="text-foreground hover:text-secondary font-semibold transition-smooth text-sm lg:text-base">
+            <Link href="/about" className="text-foreground hover:text-secondary font-semibold transition-smooth text-sm lg:text-base">
               About
             </Link>
             <Link href="/school" className="text-foreground hover:text-secondary font-semibold transition-smooth text-sm lg:text-base">
@@ -228,7 +227,7 @@ export default function HomePage() {
       </header>
 
      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-background via-primary/5 to-accent/10 pt-20">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-linear-to-br from-background via-primary/5 to-accent/10 pt-20">
         {/* Floating decoration elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-20 left-10 animate-float hidden sm:block">
@@ -256,7 +255,7 @@ export default function HomePage() {
                 </div>
                 
                 <h1 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl font-black leading-tight">
-                  <span className="text-gradient-primary">
+                  <span className="text-linear-primary">
                     Empower Your Child
                   </span>
                   <br />
@@ -264,7 +263,7 @@ export default function HomePage() {
                     with Future-Ready
                   </span>
                   <br />
-                  <span className="text-gradient-secondary">
+                  <span className="text-linear-secondary">
                     Skills
                   </span>
                 </h1>
@@ -310,7 +309,7 @@ export default function HomePage() {
                 />
                 
                 {/* Floating achievement badges */}
-                <div className="absolute -top-4 -left-4 bg-gradient-success text-primary-foreground px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-bold shadow-glow">
+                <div className="absolute -top-4 -left-4 bg-linear-success text-primary-foreground px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-bold shadow-glow">
                   <Star className="w-3 h-3 sm:w-4 sm:h-4 inline mr-1" />
                   Level Up!
                 </div>
@@ -332,7 +331,7 @@ export default function HomePage() {
           <div className="grid sm:grid-cols-2 gap-6 sm:gap-8">
             <Card className="bg-card border-border shadow-card hover:shadow-glow transition-smooth">
               <CardHeader className="flex flex-row items-center gap-4">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-primary rounded-lg flex items-center justify-center shrink-0">
                   <Brain className="h-6 w-6 sm:h-8 sm:w-8 text-primary-foreground" />
                 </div>
                 <div>
@@ -343,7 +342,7 @@ export default function HomePage() {
             </Card>
             <Card className="bg-card border-border shadow-card hover:shadow-glow transition-smooth">
               <CardHeader className="flex flex-row items-center gap-4">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-secondary rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-secondary rounded-lg flex items-center justify-center shrink-0">
                   <Rocket className="h-6 w-6 sm:h-8 sm:w-8 text-secondary-foreground" />
                 </div>
                 <div>
@@ -460,7 +459,7 @@ export default function HomePage() {
               Join a community mastering AI and business through interactive challenges.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button className="group bg-gradient-primary hover:bg-gradient-secondary text-primary-foreground px-6 py-4 rounded-full text-base sm:text-lg font-semibold transition-smooth">
+              <Button className="group bg-linear-primary hover:bg-linear-secondary text-primary-foreground px-6 py-4 rounded-full text-base sm:text-lg font-semibold transition-smooth">
                 <Link href="/auth/sign-up" className="flex items-center">
                   Join Now
                   <Rocket className="w-5 h-5 ml-2 group-hover:animate-pulse-fun" />
@@ -530,7 +529,7 @@ export default function HomePage() {
             </div>
             <Card className="p-6 sm:p-8 bg-card border-border shadow-card hover:shadow-glow transition-smooth">
               <div className="text-center space-y-4">
-                <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-full bg-gradient-primary flex items-center justify-center text-primary-foreground text-xl sm:text-2xl font-bold">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-full bg-linear-primary flex items-center justify-center text-primary-foreground text-xl sm:text-2xl font-bold">
                   MZ
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold text-primary">Mohamed Zouari</h3>
@@ -543,7 +542,7 @@ export default function HomePage() {
           <div className="grid sm:grid-cols-2 gap-6 sm:gap-8">
             <Card className="p-6 sm:p-8 bg-card border-border shadow-card hover:shadow-glow transition-smooth">
               <CardHeader className="text-center p-0 mb-4">
-                <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto rounded-full bg-gradient-primary flex items-center justify-center mb-4">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto rounded-full bg-linear-primary flex items-center justify-center mb-4">
                   <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-primary-foreground" />
                 </div>
                 <CardTitle className="text-xl sm:text-2xl text-primary">Our Mission</CardTitle>
@@ -556,7 +555,7 @@ export default function HomePage() {
             </Card>
             <Card className="p-6 sm:p-8 bg-card border-border shadow-card hover:shadow-glow transition-smooth">
               <CardHeader className="text-center p-0 mb-4">
-                <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto rounded-full bg-gradient-secondary flex items-center justify-center mb-4">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto rounded-full bg-linear-secondary flex items-center justify-center mb-4">
                   <Globe className="w-6 h-6 sm:w-8 sm:h-8 text-secondary-foreground" />
                 </div>
                 <CardTitle className="text-xl sm:text-2xl text-primary">Our Vision</CardTitle>
@@ -572,7 +571,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-12 sm:py-16 px-4 sm:px-6 bg-gradient-primary text-primary-foreground">
+      <section className="py-12 sm:py-16 px-4 sm:px-6 bg-linear-primary text-primary-foreground">
         <div className="container mx-auto text-center max-w-4xl">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-4 sm:mb-6">Ready to Start Your Journey?</h2>
           <p className="text-base sm:text-lg mb-6 sm:mb-8 font-medium px-4">
