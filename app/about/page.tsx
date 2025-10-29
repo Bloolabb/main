@@ -124,10 +124,10 @@ export default function AboutUsPage() {
       </main>
 
       {/* CTA Section */}
-      <section className="py-12 sm:py-16 px-4 sm:px-6 bg-linear-primary text-primary-foreground">
+      <section className="py-12 sm:py-16 px-4 sm:px-6 bg-linear-primary text-black">
         <div className="container mx-auto text-center max-w-4xl">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-4 sm:mb-6">Ready to Start Your Journey?</h2>
-          <p className="text-base sm:text-lg mb-6 sm:mb-8 font-medium px-4">
+          <p className="text-base sm:text-lg mb-6 sm:mb-8 font-medium px-4 text-blue-500">
             Join a vibrant community mastering AI and business through interactive experiences.
           </p>
           <Button className="bg-secondary hover:bg-card hover:text-primary px-6 sm:px-8 py-4 rounded-full font-semibold text-base sm:text-lg transition-smooth">
