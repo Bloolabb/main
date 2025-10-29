@@ -403,7 +403,7 @@ export default function HomePage() {
                 >
                   <CardHeader className="text-center pb-4">
                     <div className={`w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-full ${colorData.bg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-glow`}>
-                      <IconComponent className={`w-8 h-8 sm:w-10 sm:h-10 ${colorData.text}`} />
+                      <IconComponent className={`w-8 h-8 sm:w-10 sm:h-10 text-orange`} />
                     </div>
                     <CardTitle className="text-xl sm:text-2xl font-bold group-hover:text-primary transition-smooth">
                       {item.title}
