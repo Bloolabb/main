@@ -28,20 +28,28 @@ const learningTracks = [
 export default function OnboardingPage() {
   const [selectedTrack, setSelectedTrack] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [isInitializing, setIsInitializing] = useState(true)
   const [user, setUser] = useState<any>(null)
   const router = useRouter()
   const supabase = createClient()
 
   useEffect(() => {
     const getUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-      if (!user) {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser()
+        if (!user) {
+          router.push("/auth/login")
+          return
+        }
+        setUser(user)
+      } catch (error) {
+        console.error("Error fetching user:", error)
         router.push("/auth/login")
-        return
+      } finally {
+        setIsInitializing(false)
       }
-      setUser(user)
     }
     getUser()
   }, [router, supabase.auth])
@@ -51,7 +59,6 @@ export default function OnboardingPage() {
 
     setIsLoading(true)
     try {
-      // Update user profile with selected track preference
       const { error } = await supabase
         .from("profiles")
         .update({
@@ -60,10 +67,7 @@ export default function OnboardingPage() {
         })
         .eq("id", user.id)
 
-      if (error) {
-        console.error("Profile update error:", error)
-        throw error
-      }
+      if (error) throw error
 
       router.push("/dashboard")
     } catch (error) {
@@ -74,12 +78,24 @@ export default function OnboardingPage() {
     }
   }
 
-  if (!user) {
-    return <div>Loading...</div>
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen bg-linear-to-br from-indigo-50 to-cyan-50 flex items-center justify-center">
+        <Card className="w-full max-w-md p-8 text-center">
+          <CardContent>
+            <div className="text-4xl mb-4">⌛</div>
+            <CardTitle className="text-xl font-bold text-indigo-600 mb-2">
+              Setting Up Your Journey
+            </CardTitle>
+            <CardDescription>Just a moment while we prepare your experience...</CardDescription>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-cyan-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-indigo-50 to-cyan-50 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
         <Card className="border-2 border-indigo-200 shadow-xl">
           <CardHeader className="text-center space-y-4">
@@ -99,7 +115,7 @@ export default function OnboardingPage() {
                       ? `border-${track.color}-400 bg-${track.color}-50 shadow-lg scale-105`
                       : "border-gray-200 hover:border-gray-300 hover:shadow-md"
                   }`}
-                  onClick={() => setSelectedTrack(track.id)}
+                  onClick={() => !isLoading && setSelectedTrack(track.id)}
                 >
                   <CardContent className="p-6">
                     <div className="flex items-center space-x-4">
@@ -130,9 +146,10 @@ export default function OnboardingPage() {
             <Button
               onClick={handleTrackSelection}
               disabled={!selectedTrack || isLoading}
+              isLoading={isLoading}
               className="w-full h-12 text-lg bg-indigo-500 hover:bg-indigo-600 font-semibold disabled:opacity-50"
             >
-              {isLoading ? "Setting Up Your Journey..." : "Start Learning!"}
+              Start Learning!
             </Button>
 
             <p className="text-center text-sm text-gray-500">
