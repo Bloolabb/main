@@ -470,7 +470,7 @@ export function SettingsForm({ user, profile }: SettingsFormProps) {
 
                         <div className="flex flex-col sm:flex-row gap-3">
                           <Label htmlFor="avatar-upload" className="cursor-block">
-                            <Input disabled
+                            <Input
                               id="avatar-upload"
                               type="file"
                               accept="image/jpeg,image/jpg,image/png,image/gif"
