@@ -11,6 +11,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
+
 export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -25,13 +26,74 @@ export default function LoginPage() {
     setError(null)
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      // User authentication
+      const { error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
-      if (error) throw error
+      if (authError) throw authError
+
+      // After successful login, update login streak
+      const { data: userData } = await supabase.auth.getUser()
+      if (userData?.user) {
+        // First, get the current profile to check the last activity date
+        const { data: profile, error: fetchError } = await supabase
+          .from("profiles")
+          .select("current_streak, longest_streak, last_activity_date")
+          .eq("id", userData.user.id)
+          .single()
+
+        if (fetchError) throw fetchError
+
+        // Calculate new streak
+        const today = new Date()
+        const todayDate = today.toISOString().split('T')[0] // Get YYYY-MM-DD format
+        const lastActivityDate = profile?.last_activity_date
+        
+        let newCurrentStreak = profile?.current_streak || 0
+        const currentLongestStreak = profile?.longest_streak || 0
+
+        if (lastActivityDate) {
+          const lastActivity = new Date(lastActivityDate)
+          const yesterday = new Date(today)
+          yesterday.setDate(yesterday.getDate() - 1)
+          
+          const isConsecutiveDay = lastActivity.toDateString() === yesterday.toDateString()
+          const isSameDay = lastActivity.toDateString() === today.toDateString()
+          
+          if (isConsecutiveDay) {
+            // Consecutive day - increment streak
+            newCurrentStreak += 1
+          } else if (!isSameDay) {
+            // Not consecutive and not same day - reset streak to 1
+            newCurrentStreak = 1
+          }
+          // If same day, keep the current streak unchanged
+        } else {
+          // First time login or no last activity date
+          newCurrentStreak = 1
+        }
+
+        // Calculate new longest streak
+        const newLongestStreak = Math.max(currentLongestStreak, newCurrentStreak)
+
+        // Update the profile with new streaks and last activity
+        const { error: updateError } = await supabase
+          .from("profiles")
+          .update({
+            current_streak: newCurrentStreak,
+            longest_streak: newLongestStreak,
+            last_activity_date: todayDate,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", userData.user.id)
+
+        if (updateError) throw updateError
+      }
 
       router.push("/dashboard")
+      router.refresh()
+
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred")
     } finally {

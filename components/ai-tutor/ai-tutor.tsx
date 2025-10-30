@@ -295,25 +295,13 @@ export function AITutors() {
           </CardContent>
         </Card>
       )}
-      {/* First Time User Guide */}
-      {hasHearts && messages.length === 0 && (
-        <Card className="border-2 border-blue-200 bg-blue-50">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <Lightbulb className="h-5 w-5 text-blue-500" />
-              <div className="text-sm text-blue-700">
-                <strong>Tip:</strong> You have {hearts.heartsRemaining} hearts today. Each question uses 1 heart. Hearts reset daily!
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}{/* Chat Input - Moved to top of chat area */}
+     {/* Chat Input - Moved to top of chat area */}
       {hasHearts && (
         <div className="relative">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={`Ask about AI, business, or technology... (${hearts.heartsRemaining} hearts left)`}
+            placeholder={`Ask Anything... (${hearts.heartsRemaining} hearts left)`}
             className="h-14 text-lg pr-20 border-2 border-primary/20 focus:border-primary transition-colors shadow-sm"
             onKeyPress={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {

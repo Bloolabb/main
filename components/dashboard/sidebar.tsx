@@ -50,21 +50,23 @@ export function Sidebar({ user, profile, isOpen, onClose }: SidebarProps) {
   return (
     <div 
       className={`
-        w-80 h-full bg-white/95 backdrop-blur-md border-r border-gray-100
-        flex flex-col shadow-xl
+        fixed lg:relative w-80 h-screen bg-white/95 backdrop-blur-md border-r border-gray-100
+        flex flex-col shadow-xl z-50
         lg:bg-white lg:backdrop-blur-0 lg:shadow-none
+        ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        transition-transform duration-300 ease-in-out
       `}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       
-      {/* Header Section */}
+      {/* Header Section - Fixed height */}
       <div className="shrink-0">
         {/* Brand Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-100">
           <div className="flex items-center space-x-3">
             <div className="relative">
-              <div className="w-10 h-10 bg-linear-to-br from-purple-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
                 <Sparkles className="h-5 w-5 text-white" />
               </div>
               <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
@@ -86,7 +88,7 @@ export function Sidebar({ user, profile, isOpen, onClose }: SidebarProps) {
 
         {/* User Profile Card */}
         <div className="p-4">
-          <Card className="bg-linear-to-br from-gray-900 to-gray-800 text-white p-5 shadow-2xl border-0 overflow-hidden relative group cursor-pointer hover:shadow-2xl transition-all duration-300">
+          <Card className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-5 shadow-2xl border-0 overflow-hidden relative group cursor-pointer hover:shadow-2xl transition-all duration-300">
             
             {/* Animated Background Elements */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-16 translate-x-16 group-hover:scale-110 transition-transform duration-500"></div>
@@ -100,7 +102,7 @@ export function Sidebar({ user, profile, isOpen, onClose }: SidebarProps) {
                     <div className="text-2xl">🎓</div>
                   </div>
                   {profile?.current_streak > 0 && (
-                    <div className="absolute -top-1 -right-1 bg-linear-to-r from-orange-500 to-red-500 rounded-full p-1.5 shadow-lg animate-pulse">
+                    <div className="absolute -top-1 -right-1 bg-gradient-to-r from-orange-500 to-red-500 rounded-full p-1.5 shadow-lg animate-pulse">
                       <Flame className="h-3 w-3 text-white" />
                     </div>
                   )}
@@ -126,7 +128,7 @@ export function Sidebar({ user, profile, isOpen, onClose }: SidebarProps) {
                 </div>
                 <div className="w-full bg-white/20 rounded-full h-2.5 backdrop-blur-sm overflow-hidden">
                   <div 
-                    className="bg-linear-to-r from-amber-400 to-amber-300 h-2.5 rounded-full shadow-sm transition-all duration-1000 ease-out"
+                    className="bg-gradient-to-r from-amber-400 to-amber-300 h-2.5 rounded-full shadow-sm transition-all duration-1000 ease-out"
                     style={{ width: `${(currentLevelXp / 100) * 100}%` }}
                   ></div>
                 </div>
@@ -161,7 +163,7 @@ export function Sidebar({ user, profile, isOpen, onClose }: SidebarProps) {
         </div>
       </div>
 
-      {/* Scrollable Content Area */}
+      {/* Scrollable Content Area - Takes remaining space */}
       <div className="flex-1 overflow-y-auto">
         {/* Language Selector */}
         <div className="px-4 mb-6">
@@ -187,7 +189,7 @@ export function Sidebar({ user, profile, isOpen, onClose }: SidebarProps) {
                 className={`
                   group flex items-center justify-between px-3 py-3 rounded-xl transition-all duration-200 relative
                   ${isActive
-                    ? "bg-linear-to-r from-purple-50 to-blue-50 text-purple-700 border border-purple-200 shadow-sm"
+                    ? "bg-gradient-to-r from-purple-50 to-blue-50 text-purple-700 border border-purple-200 shadow-sm"
                     : "text-gray-700 hover:bg-gray-50 hover:text-gray-900 hover:shadow-sm border border-transparent"
                   }
                 `}
@@ -196,8 +198,8 @@ export function Sidebar({ user, profile, isOpen, onClose }: SidebarProps) {
                   <div className={`
                     p-2 rounded-lg transition-all duration-200
                     ${isActive 
-                      ? "bg-linear-to-r from-purple-600 to-blue-600 text-white shadow-sm" 
-                      : "bg-gray-100 text-gray-600 group-hover:bg-linear-to-r group-hover:from-purple-600 group-hover:to-blue-600 group-hover:text-white"
+                      ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-sm" 
+                      : "bg-gray-100 text-gray-600 group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:to-blue-600 group-hover:text-white"
                     }
                   `}>
                     <Icon className="h-4 w-4" />
@@ -211,7 +213,7 @@ export function Sidebar({ user, profile, isOpen, onClose }: SidebarProps) {
                       {item.badge && (
                         <span className={`
                           px-1.5 py-0.5 rounded-full text-xs font-medium
-                          ${item.badge === 'new' 
+                          ${item.badge === 'beta' 
                             ? 'bg-green-100 text-green-700' 
                             : 'bg-blue-100 text-blue-700'
                           }
@@ -230,7 +232,7 @@ export function Sidebar({ user, profile, isOpen, onClose }: SidebarProps) {
                 
                 {/* Active indicator & hover arrow */}
                 {isActive && (
-                  <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-6 bg-linear-to-b from-purple-600 to-blue-600 rounded-r-full"></div>
+                  <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-purple-600 to-blue-600 rounded-r-full"></div>
                 )}
                 <ChevronRight className={`
                   h-4 w-4 transition-transform duration-200
@@ -243,7 +245,7 @@ export function Sidebar({ user, profile, isOpen, onClose }: SidebarProps) {
         </nav>
       </div>
 
-      {/* Footer Section */}
+      {/* Footer Section - Fixed at bottom */}
       <div className="flex-shrink-0 border-t border-gray-200 bg-gray-50/50 backdrop-blur-sm">
         <div className="p-4">
           <Button

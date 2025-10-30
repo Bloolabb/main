@@ -3,6 +3,8 @@ import { DashboardLayout } from "@/components/dashboard/dashboard-layout"
 import { AITutors } from "@/components/ai-tutor/ai-tutor"
 import { redirect } from "next/navigation"
 import { Brain, Zap, Sparkles, ArrowRight } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Lightbulb } from "lucide-react"
 
 
 export default async function AITutorPage() {
@@ -54,7 +56,18 @@ export default async function AITutorPage() {
         <br />
         {/* AI Tutors Component */}
         <AITutors />
+       {/* First Time User Guide */}
 
+        <Card className="border-2 border-blue-200 bg-blue-50 my-8">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <Lightbulb className="h-5 w-5 text-blue-500" />
+              <div className="text-sm text-blue-700">
+                <strong>Tip:</strong> You have 5 hearts a today. Each question uses 1 heart. Hearts reset daily!
+              </div>
+            </div>
+          </CardContent>
+        </Card>
         {/* Simple AI Features Section */}
         <div className="bg-gray-50 rounded-xl p-6 border">
           <div className="flex items-center gap-3 mb-4">
