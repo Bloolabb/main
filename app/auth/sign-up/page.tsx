@@ -16,6 +16,7 @@ export default function SignUpPage() {
   const [password, setPassword] = useState("")
   const [displayName, setDisplayName] = useState("")
   const [dateOfBirth, setDateOfBirth] = useState("")
+  const [phoneNumber, setPhoneNumber] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -27,6 +28,7 @@ export default function SignUpPage() {
     setIsLoading(true)
     setError(null)
 
+    // Basic validations
     if (password !== confirmPassword) {
       setError("Passwords do not match")
       setIsLoading(false)
@@ -39,23 +41,21 @@ export default function SignUpPage() {
       return
     }
 
-    // Calculate age and validate
-    const birthDate = new Date(dateOfBirth)
-    const today = new Date()
-    let age = today.getFullYear() - birthDate.getFullYear()
-    const monthDiff = today.getMonth() - birthDate.getMonth()
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--
+    if (!displayName.trim()) {
+      setError("Display name is required")
+      setIsLoading(false)
+      return
     }
 
-    if (age < 13) {
-      setError("You must be at least 13 years old to sign up")
+    if (!phoneNumber.trim()) {
+      setError("Phone number is required")
       setIsLoading(false)
       return
     }
 
     try {
-      const { error } = await supabase.auth.signUp({
+      // Sign up the user with all metadata
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -64,20 +64,70 @@ export default function SignUpPage() {
           data: {
             display_name: displayName,
             date_of_birth: dateOfBirth,
+            phone_number: phoneNumber,
+            full_name: displayName, // This might show in the main user view
           },
         },
       })
-      if (error) throw error
+
+      if (signUpError) throw signUpError
+
+      console.log('Auth user created:', authData.user)
+
+      // Wait a moment for the user to be fully created in auth system
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      // Create profile in the database
+      if (authData.user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .upsert({
+            id: authData.user.id,
+            display_name: displayName,
+            date_of_birth: dateOfBirth || null,
+            phone_number: phoneNumber,
+            email: email,
+            total_xp: 0,
+            current_streak: 0,
+            longest_streak: 0,
+            updated_at: new Date().toISOString(),
+          })
+
+        if (profileError) {
+          console.error('Profile creation error:', profileError)
+          // Continue anyway since auth was successful
+        } else {
+          console.log('Profile created successfully')
+        }
+
+        // Update the user metadata again to ensure it's saved in auth
+        const { error: updateError } = await supabase.auth.updateUser({
+          data: {
+            phone_number: phoneNumber,
+            display_name: displayName,
+            date_of_birth: dateOfBirth,
+          }
+        })
+
+        if (updateError) {
+          console.error('Error updating user metadata:', updateError)
+        } else {
+          console.log('User metadata updated successfully')
+        }
+      }
+
+      // Redirect to check email page
       router.push("/auth/check-email")
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred")
+      console.error('Signup error:', error)
+      setError(error instanceof Error ? error.message : "An error occurred during sign up")
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-liniar-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <Card className="border-2 border-green-200 shadow-xl">
           <CardHeader className="text-center space-y-2">
@@ -91,7 +141,7 @@ export default function SignUpPage() {
             <form onSubmit={handleSignUp} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="displayName" className="text-sm font-medium text-gray-700">
-                  Your Name
+                  Your Name *
                 </Label>
                 <Input
                   id="displayName"
@@ -100,6 +150,20 @@ export default function SignUpPage() {
                   required
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
+                  className="h-12 border-2 border-gray-200 focus:border-green-400"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phoneNumber" className="text-sm font-medium text-gray-700">
+                  Phone Number *
+                </Label>
+                <Input
+                  id="phoneNumber"
+                  type="tel"
+                  placeholder="Your phone number"
+                  required
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
                   className="h-12 border-2 border-gray-200 focus:border-green-400"
                 />
               </div>
@@ -118,7 +182,7 @@ export default function SignUpPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-                  Email
+                  Email *
                 </Label>
                 <Input
                   id="email"
@@ -132,7 +196,7 @@ export default function SignUpPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password" className="text-sm font-medium text-gray-700">
-                  Password
+                  Password *
                 </Label>
                 <Input
                   id="password"
@@ -146,7 +210,7 @@ export default function SignUpPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
-                  Confirm Password
+                  Confirm Password *
                 </Label>
                 <Input
                   id="confirmPassword"

@@ -102,7 +102,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 to-green-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <Card className="border-2 border-blue-200 shadow-xl">
           <CardHeader className="text-center space-y-2">
@@ -147,9 +147,9 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 className="w-full h-12 text-lg bg-blue-500 hover:bg-blue-600 font-semibold"
-                disabled={isLoading}
+                isLoading={isLoading}
               >
-                {isLoading ? "Signing In..." : "Sign In"}
+                Sign In
               </Button>
             </form>
             <div className="mt-6 text-center">
