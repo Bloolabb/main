@@ -54,8 +54,8 @@ export default function SignUpPage() {
     }
 
     try {
-      // Only handle auth signup - let database trigger handle profile creation
-      const { error: signUpError } = await supabase.auth.signUp({
+      // Sign up the user with all metadata
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -64,12 +64,57 @@ export default function SignUpPage() {
           data: {
             display_name: displayName,
             date_of_birth: dateOfBirth,
-            phone_number: phoneNumber
+            phone_number: phoneNumber,
+            full_name: displayName, // This might show in the main user view
           },
         },
       })
 
       if (signUpError) throw signUpError
+
+      console.log('Auth user created:', authData.user)
+
+      // Wait a moment for the user to be fully created in auth system
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      // Create profile in the database
+      if (authData.user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .upsert({
+            id: authData.user.id,
+            display_name: displayName,
+            date_of_birth: dateOfBirth || null,
+            phone_number: phoneNumber,
+            email: email,
+            total_xp: 0,
+            current_streak: 0,
+            longest_streak: 0,
+            updated_at: new Date().toISOString(),
+          })
+
+        if (profileError) {
+          console.error('Profile creation error:', profileError)
+          // Continue anyway since auth was successful
+        } else {
+          console.log('Profile created successfully')
+        }
+
+        // Update the user metadata again to ensure it's saved in auth
+        const { error: updateError } = await supabase.auth.updateUser({
+          data: {
+            phone_number: phoneNumber,
+            display_name: displayName,
+            date_of_birth: dateOfBirth,
+          }
+        })
+
+        if (updateError) {
+          console.error('Error updating user metadata:', updateError)
+        } else {
+          console.log('User metadata updated successfully')
+        }
+      }
 
       // Redirect to check email page
       router.push("/auth/check-email")
