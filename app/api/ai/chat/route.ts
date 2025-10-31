@@ -161,27 +161,26 @@ export async function POST(request: NextRequest) {
     // Memory: Store AI response
     appendConversation(conversationId, 'assistant', aiResponse)
 
-    // 3️⃣ Save conversation to database
+    // 3️⃣ Save conversation to new public.ai_conversations table
     let savedConversationId = conversationId
     try {
-      const conversationTitle = message.slice(0, 50) + (message.length > 50 ? '...' : '')
-      
       const { data: conversationData, error: conversationError } = await supabase
-        .rpc('save_ai_conversation', {
-          user_uuid: user.id,
-          conversation_title: conversationTitle,
-          user_message: message,
-          ai_response: aiResponse,
-          existing_conversation_id: conversationId
-        })
+        .from('public.ai_conversations')
+        .insert([{
+          user_id: user.id,
+          user_prompt: message,
+          ai_content: aiResponse
+        }])
+        .select('id')
+        .single()
 
       if (conversationError) {
-        console.error('Failed to save conversation:', conversationError)
-      } else if (conversationData && conversationData.length > 0) {
-        savedConversationId = conversationData[0].conversation_id
+        console.error('Failed to save conversation to new table:', conversationError)
+      } else if (conversationData) {
+        savedConversationId = conversationData.id
       }
     } catch (saveError) {
-      console.error('Error saving conversation:', saveError)
+      console.error('Error saving conversation to new table:', saveError)
       // Don't fail the request if saving conversation fails
     }
 
@@ -402,7 +401,7 @@ EDUCATIONAL APPROACH:
 
 // NEW: Fallback response with user context
 function getFallbackResponse(message: string, userContext: any): string {
-  const personalizedGreeting = userContext.completedLessons > 0 
+  const personalizedGreeting = userContext.completedLessons > 0
     ? `I see you've completed ${userContext.completedLessons} lessons and reached Level ${userContext.userLevel}! `
     : "I'm excited to help you start your learning journey! "
     
