@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Brain, Rocket, Sparkles, BookOpen, Globe, Award, ChevronRight, Star, Zap, Lightbulb, Heart, TrendingUp, Palette, Users, Check, Crown, X, Menu } from "lucide-react";
 import { LanguageSelector } from "@/components/language-selector";
 import heroImage from "@/assets/hero-image.webp";
@@ -165,7 +166,7 @@ export default function HomePage() {
             <Link href="#courses" className="text-foreground hover:text-secondary font-semibold transition-smooth text-sm lg:text-base">
               Courses
             </Link>
-            <Link href="/about" className="text-foreground hover:text-secondary font-semibold transition-smooth text-sm lg:text-base">
+            <Link href="#about" className="text-foreground hover:text-secondary font-semibold transition-smooth text-sm lg:text-base">
               About
             </Link>
             <Link href="/school" className="text-foreground hover:text-secondary font-semibold transition-smooth text-sm lg:text-base">
@@ -227,7 +228,7 @@ export default function HomePage() {
       </header>
 
      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-linear-to-br from-background via-primary/5 to-accent/10 pt-20">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-background via-primary/5 to-accent/10 pt-20">
         {/* Floating decoration elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-20 left-10 animate-float hidden sm:block">
@@ -331,7 +332,7 @@ export default function HomePage() {
           <div className="grid sm:grid-cols-2 gap-6 sm:gap-8">
             <Card className="bg-card border-border shadow-card hover:shadow-glow transition-smooth">
               <CardHeader className="flex flex-row items-center gap-4">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-primary rounded-lg flex items-center justify-center shrink-0">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
                   <Brain className="h-6 w-6 sm:h-8 sm:w-8 text-primary-foreground" />
                 </div>
                 <div>
@@ -342,7 +343,7 @@ export default function HomePage() {
             </Card>
             <Card className="bg-card border-border shadow-card hover:shadow-glow transition-smooth">
               <CardHeader className="flex flex-row items-center gap-4">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-secondary rounded-lg flex items-center justify-center shrink-0">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-secondary rounded-lg flex items-center justify-center flex-shrink-0">
                   <Rocket className="h-6 w-6 sm:h-8 sm:w-8 text-secondary-foreground" />
                 </div>
                 <div>

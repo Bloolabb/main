@@ -6,7 +6,6 @@ import { Brain, Zap, Sparkles, ArrowRight } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Lightbulb } from "lucide-react"
 
-
 export default async function AITutorPage() {
   const supabase = await createClient()
 
@@ -23,7 +22,7 @@ export default async function AITutorPage() {
         {/* Clean Header */}
         <div className="text-center">
           {/* Hero Section matching the image */}
-          <div className="relative w-full mx-auto rounded-2xl bg-linear-to-br from-blue-500 to-purple-600 text-white shadow-lg px-8 py-10">
+          <div className="relative w-full mx-auto rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-lg px-8 py-10">
             {/* Background decoration images */}
             <img
               alt="triangle"

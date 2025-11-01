@@ -5,9 +5,9 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Brain, Rocket, Sparkles, BookOpen, Globe, Award, ChevronRight, Menu, Zap, Lightbulb, Heart, TrendingUp, Palette, Users, Check, Crown, X, Building, GraduationCap, BookText, Target, Calendar, Clock, Shield, Mail, Phone, MapPin } from "lucide-react";
+import { ArrowRight, Brain, Rocket, Sparkles, BookOpen, Globe, Award, ChevronRight, Star, Zap, Lightbulb, Heart, TrendingUp, Palette, Users, Check, Crown, X, Building, GraduationCap, BookText, Target, Calendar, Clock, Shield, Mail, Phone, MapPin } from "lucide-react";
 import { LanguageSelector } from "@/components/language-selector";
-
+import Image from "next/image";
 
 // RegistrationForm component (same as before)
 function RegistrationForm({ isOpen, onClose, planType }: { isOpen: boolean; onClose: () => void; planType: string }) {
@@ -153,91 +153,45 @@ export default function SchoolsPage() {
       description: "safe networking platform with robust privacy and security measures"
     }
   ];
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
 
   return (
     <div className="min-h-screen bg-background font-sans">
       {/* Header */}
       <header className="bg-card shadow-card fixed top-0 w-full z-50">
-        <div className="container mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
               <Sparkles className="h-5 w-5 text-primary-foreground" />
             </div>
             <span className="text-xl font-extrabold text-primary">bloolabb</span>
           </div>
-          
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex gap-6 lg:gap-8">
-            <Link href="#features" className="text-foreground hover:text-secondary font-semibold transition-smooth text-sm lg:text-base">
+          <nav className="hidden md:flex gap-8">
+            <Link href="/" className="text-foreground hover:text-secondary font-semibold transition-smooth">
+              Home
+            </Link>
+            <Link href="#features" className="text-foreground hover:text-secondary font-semibold transition-smooth">
               Features
             </Link>
-            <Link href="#lpgcc" className="text-foreground hover:text-secondary font-semibold transition-smooth text-sm lg:text-base">
-              How It Works
+            <Link href="#curriculum" className="text-foreground hover:text-secondary font-semibold transition-smooth">
+              Curriculum
             </Link>
-            <Link href="#courses" className="text-foreground hover:text-secondary font-semibold transition-smooth text-sm lg:text-base">
-              Courses
-            </Link>
-            <Link href="/about" className="text-foreground hover:text-secondary font-semibold transition-smooth text-sm lg:text-base">
-              About
-            </Link>
-            <Link href="/school" className="text-foreground hover:text-secondary font-semibold transition-smooth text-sm lg:text-base">
-              School
+            {/* <Link href="#pricing" className="text-foreground hover:text-secondary font-semibold transition-smooth">
+              Pricing
+            </Link> */}
+            <Link href="#contact" className="text-foreground hover:text-secondary font-semibold transition-smooth">
+              Contact
             </Link>
           </nav>
-          
-          {/* Desktop CTA */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="flex items-center gap-4">
             <LanguageSelector />
-            <Button variant="ghost" className="text-foreground hover:bg-primary hover:text-primary-foreground font-semibold hidden lg:flex">
+            <Button variant="ghost" className="text-foreground hover:bg-primary hover:text-primary-foreground font-semibold">
               <Link href="/auth/login">Sign In</Link>
             </Button>
-            <Button className="bg-secondary hover:bg-primary text-secondary-foreground font-semibold rounded-full px-4 lg:px-6">
+            <Button className="bg-secondary hover:bg-primary text-secondary-foreground font-semibold rounded-full px-6">
               <Link href="/auth/sign-up">Get Started</Link>
             </Button>
           </div>
-
-          {/* Mobile Menu Button */}
-          <button 
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 text-foreground"
-          >
-            <Menu className="w-6 h-6" />
-          </button>
         </div>
-
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden bg-card border-t border-border">
-            <nav className="container mx-auto px-4 py-4 flex flex-col gap-4">
-              <Link href="#features" className="text-foreground hover:text-secondary font-semibold transition-smooth" onClick={() => setMobileMenuOpen(false)}>
-                Features
-              </Link>
-              <Link href="#lpgcc" className="text-foreground hover:text-secondary font-semibold transition-smooth" onClick={() => setMobileMenuOpen(false)}>
-                How It Works
-              </Link>
-              <Link href="#courses" className="text-foreground hover:text-secondary font-semibold transition-smooth" onClick={() => setMobileMenuOpen(false)}>
-                Courses
-              </Link>
-              <Link href="#about" className="text-foreground hover:text-secondary font-semibold transition-smooth" onClick={() => setMobileMenuOpen(false)}>
-                About
-              </Link>
-              <Link href="/school" className="text-foreground hover:text-secondary font-semibold transition-smooth" onClick={() => setMobileMenuOpen(false)}>
-                School
-              </Link>
-              <div className="flex flex-col gap-2 pt-2 border-t border-border">
-                <LanguageSelector />
-                <Button variant="ghost" className="text-foreground hover:bg-primary hover:text-primary-foreground font-semibold justify-start">
-                  <Link href="/auth/login">Sign In</Link>
-                </Button>
-                <Button className="bg-secondary hover:bg-primary text-secondary-foreground font-semibold rounded-full">
-                  <Link href="/auth/sign-up">Get Started</Link>
-                </Button>
-              </div>
-            </nav>
-          </div>
-        )}
       </header>
 
       {/* Hero Section */}
@@ -277,7 +231,7 @@ export default function SchoolsPage() {
                       <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mx-auto mb-2">
                         <Users className="w-6 h-6 text-primary-foreground" />
                       </div>
-                      <p className="font-bold text-primary">2+</p>
+                      <p className="font-bold text-primary">5+</p>
                       <p className="text-sm text-muted-foreground">Schools</p>
                     </CardContent>
                   </Card>
@@ -286,7 +240,7 @@ export default function SchoolsPage() {
                       <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center mx-auto mb-2">
                         <GraduationCap className="w-6 h-6 text-secondary-foreground" />
                       </div>
-                      <p className="font-bold text-secondary">30+</p>
+                      <p className="font-bold text-secondary">1,000+</p>
                       <p className="text-sm text-muted-foreground">Students</p>
                     </CardContent>
                   </Card>
@@ -295,7 +249,7 @@ export default function SchoolsPage() {
                       <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center mx-auto mb-2">
                         <BookOpen className="w-6 h-6 text-accent-foreground" />
                       </div>
-                      <p className="font-bold text-accent">2+</p>
+                      <p className="font-bold text-accent">3+</p>
                       <p className="text-sm text-muted-foreground">Courses</p>
                     </CardContent>
                   </Card>
