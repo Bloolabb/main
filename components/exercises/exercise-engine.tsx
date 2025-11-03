@@ -1,3 +1,4 @@
+// exercise-engine.tsx (Fixed)
 "use client"
 
 import { useState } from "react"
@@ -70,13 +71,31 @@ export function ExerciseEngine({
   const calculateScore = () => {
     let correct = 0
     exercises.forEach((exercise, index) => {
-      const userAnswer = answers[index]?.toLowerCase().trim()
-      const correctAnswer = exercise.correct_answer.toLowerCase().trim()
-      if (userAnswer === correctAnswer) {
-        correct++
+      const userAnswer = answers[index]
+      const correctAnswer = exercise.correct_answer
+
+      if (!userAnswer || !correctAnswer) return
+
+      if (exercise.type === "fill_blank") {
+        // For fill_blank exercises, split and normalize both answers
+        const userAnswers = userAnswer.split(';').map((ans: string) => ans.trim().toLowerCase())
+        const correctAnswers = correctAnswer.split(';').map((ans: string) => ans.trim().toLowerCase())
+        
+        // Check if all answers match (order matters)
+        const allCorrect = userAnswers.length === correctAnswers.length && 
+          userAnswers.every((ans: string, i: number) => ans === correctAnswers[i])
+        
+        if (allCorrect) {
+          correct++
+        }
+      } else {
+        // For other types, simple normalized comparison
+        if (userAnswer.trim().toLowerCase() === correctAnswer.trim().toLowerCase()) {
+          correct++
+        }
       }
     })
-    return Math.round((correct / exercises.length) * 100)
+    return exercises.length > 0 ? Math.round((correct / exercises.length) * 100) : 0
   }
 
   const updateUserXPAndStreak = async (xpReward: number) => {
@@ -243,8 +262,6 @@ export function ExerciseEngine({
         allLessons={allLessons}
         trackId={trackId}
         moduleId={moduleId}
-        // Only pass the props that ExerciseResults expects
-        // Remove userProgress and isFirstTimePassing if they're not in the interface
       />
     )
   }
@@ -276,7 +293,7 @@ export function ExerciseEngine({
 
       {/* Exercise Content */}
       <Card className="border-2 border-gray-100 shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-green-500 to-blue-600 text-white">
+        <CardHeader className="bg-linear-to-r from-green-500 to-blue-600 text-white">
           <CardTitle className="text-xl">
             {lesson.title} - Exercise {currentExercise + 1}
           </CardTitle>

@@ -166,11 +166,11 @@ export function Sidebar({ user, profile, isOpen, onClose }: SidebarProps) {
       {/* Scrollable Content Area - Takes remaining space */}
       <div className="flex-1 overflow-y-auto">
         {/* Language Selector */}
-        <div className="px-4 mb-6">
+        {/* <div className="px-4 mb-6">
           <div className="bg-gray-50/80 backdrop-blur-sm rounded-xl p-3 border border-gray-200 hover:border-gray-300 transition-colors">
             <LanguageSelector />
           </div>
-        </div>
+        </div> */}
 
         {/* Navigation Section */}
         <nav className="px-3 space-y-1.5 pb-6">
@@ -246,9 +246,8 @@ export function Sidebar({ user, profile, isOpen, onClose }: SidebarProps) {
       </div>
 
       {/* Footer Section - Fixed at bottom */}
-      <div className="flex-shrink-0 border-t border-gray-200 bg-gray-50/50 backdrop-blur-sm">
-        <div className="p-4">
-          <Button
+      <div className="shrink-0 border-t border-gray-200 bg-gray-50/50 backdrop-blur-sm">
+          {/* <Button
             onClick={handleSignOut}
             variant="ghost"
             className="w-full justify-start text-gray-700 hover:text-red-700 hover:bg-red-50 rounded-xl py-3 transition-all duration-200 group"
@@ -259,11 +258,11 @@ export function Sidebar({ user, profile, isOpen, onClose }: SidebarProps) {
               </div>
               <span className="font-medium text-sm">Sign Out</span>
             </div>
-          </Button>
+          </Button> */}
           
           {/* Version/Status */}
           <div className="mt-3 pt-3 border-t border-gray-200">
-            <div className="flex items-center justify-between text-xs text-gray-500">
+            <div className="flex items-center justify-between text-xs text-gray-500 p-2">
               <span>v2.1.0</span>
               <div className="flex items-center space-x-1">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -273,6 +272,5 @@ export function Sidebar({ user, profile, isOpen, onClose }: SidebarProps) {
           </div>
         </div>
       </div>
-    </div>
   )
 }

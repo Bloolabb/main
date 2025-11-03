@@ -59,7 +59,7 @@ export function LessonContent({ lesson, userProgress, allLessons, trackId, modul
     {
       type: "intro",
       title: "Getting Started",
-      content: `Welcome to "${lessonData.title}"! ${lessonData.description ? lessonData.description.substring(0, 100) + "..." : "Let's begin your learning journey."}`,
+      content: `Welcome to "${lessonData.title}"! ${lessonData.description + " Let's begin your learning journey."}`,
     },
     {
       type: "content",

@@ -1,3 +1,4 @@
+// exercise-results.tsx (Fixed)
 "use client"
 
 import { Button } from "@/components/ui/button"
@@ -28,10 +29,25 @@ export function ExerciseResults({
   moduleId,
 }: ExerciseResultsProps) {
   const router = useRouter()
+  
   const correctAnswers = exercises.filter((exercise, index) => {
-    const userAnswer = answers[index]?.toLowerCase().trim()
-    const correctAnswer = exercise.correct_answer.toLowerCase().trim()
-    return userAnswer === correctAnswer
+    const userAnswer = answers[index]
+    const correctAnswer = exercise.correct_answer
+
+    if (!userAnswer || !correctAnswer) return false
+
+    if (exercise.type === "fill_blank") {
+      // For fill_blank exercises, split and normalize both answers
+      const userAnswers = userAnswer.split(';').map((ans: string) => ans.trim().toLowerCase())
+      const correctAnswers = correctAnswer.split(';').map((ans: string) => ans.trim().toLowerCase())
+      
+      // Check if all answers match (order matters)
+      return userAnswers.length === correctAnswers.length && 
+        userAnswers.every((ans: string, i: number) => ans === correctAnswers[i])
+    } else {
+      // For other types, simple normalized comparison
+      return userAnswer.trim().toLowerCase() === correctAnswer.trim().toLowerCase()
+    }
   }).length
 
   const passed = score >= 70
@@ -101,7 +117,14 @@ export function ExerciseResults({
         <CardContent className="space-y-4">
           {exercises.map((exercise, index) => {
             const userAnswer = answers[index]
-            const isCorrect = userAnswer?.toLowerCase().trim() === exercise.correct_answer.toLowerCase().trim()
+            const isCorrect = exercise.type === "fill_blank"
+              ? (() => {
+                  const userAnswers = userAnswer?.split(';').map((ans: string) => ans.trim().toLowerCase()) || []
+                  const correctAnswers = exercise.correct_answer?.split(';').map((ans: string) => ans.trim().toLowerCase()) || []
+                  return userAnswers.length === correctAnswers.length && 
+                    userAnswers.every((ans: string, i: number) => ans === correctAnswers[i])
+                })()
+              : userAnswer?.toLowerCase()?.trim() === exercise.correct_answer?.toLowerCase()?.trim()
 
             return (
               <div key={index} className="border border-gray-200 rounded-lg p-4">
@@ -136,8 +159,7 @@ export function ExerciseResults({
       <div className="flex justify-center space-x-4">
         {!passed && (
           <Button
-          //  fall back navigate backwards bc we dont know lessonId || or instead of refreshing the whole page, we could navigate to the same page to reset state 
-            onClick={() => router.back()}
+            onClick={() => window.location.reload()}
             className="flex items-center space-x-2 bg-orange-500 hover:bg-orange-600"
           >
             <RotateCcw className="h-4 w-4" />
