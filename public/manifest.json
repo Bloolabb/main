@@ -1,0 +1,48 @@
+{
+  "name": "bloolabb - Learn AI & Entrepreneurship",
+  "short_name": "bloolabb",
+  "description": "Interactive learning platform for teens to master AI fundamentals and entrepreneurship skills through gamified lessons and exercises.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/assets/black-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/black-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "learning"],
+  "screenshots": [
+    {
+      "src": "/assets/white-logo.png",
+      "sizes": "1280x720",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Go to your learning dashboard",
+      "url": "/dashboard",
+      "icons": [{ "src": "/assets/black-logo.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Learn",
+      "short_name": "Learn",
+      "description": "Browse learning tracks",
+      "url": "/learn",
+      "icons": [{ "src": "/assets/white-logo.png", "sizes": "96x96" }]
+    }
+  ]
+}
