@@ -4,7 +4,7 @@
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
 import { CheckCircle, XCircle } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 interface CaseStudyExerciseProps {
   exercise: any
@@ -15,12 +15,20 @@ interface CaseStudyExerciseProps {
 
 export function CaseStudyExercise({ exercise, selectedAnswer, onAnswer, error }: CaseStudyExerciseProps) {
   const [showAnalysis, setShowAnalysis] = useState(false)
+  const [shuffledOptions, setShuffledOptions] = useState<string[]>([])
 
-  const options = Array.isArray(exercise.options) 
-    ? exercise.options 
-    : typeof exercise.options === 'string' 
-      ? JSON.parse(exercise.options.replace(/\\"/g, '"'))
-      : []
+  useEffect(() => {
+    // Parse and shuffle options whenever exercise changes
+    const options = Array.isArray(exercise.options) 
+      ? exercise.options 
+      : typeof exercise.options === 'string' 
+        ? JSON.parse(exercise.options.replace(/\\"/g, '"'))
+        : []
+
+    // Shuffle the options array
+    const shuffled = [...options].sort(() => Math.random() - 0.5)
+    setShuffledOptions(shuffled)
+  }, [exercise.options])
 
   const handleAnswer = (answer: string) => {
     onAnswer(answer)
@@ -59,19 +67,25 @@ export function CaseStudyExercise({ exercise, selectedAnswer, onAnswer, error }:
         <h3 className="text-lg font-semibold text-gray-800 mb-4">What would you do?</h3>
         
         <div className="grid gap-3">
-          {options.map((option: string, index: number) => (
-            <Button
+          {shuffledOptions.map((option: string, index: number) => (
+            <motion.div
               key={index}
-              onClick={() => handleAnswer(option)}
-              variant={selectedAnswer === option ? "default" : "outline"}
-              className={`p-4 h-auto text-left justify-start w-full ${
-                selectedAnswer === option
-                  ? "bg-purple-500 hover:bg-purple-600 text-white"
-                  : "bg-white hover:bg-gray-50"
-              }`}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.1 }}
             >
-              {option}
-            </Button>
+              <Button
+                onClick={() => handleAnswer(option)}
+                variant={selectedAnswer === option ? "default" : "outline"}
+                className={`p-4 h-auto text-left justify-start w-full ${
+                  selectedAnswer === option
+                    ? "bg-purple-500 hover:bg-purple-600 text-white"
+                    : "bg-white hover:bg-gray-50"
+                }`}
+              >
+                {option}
+              </Button>
+            </motion.div>
           ))}
         </div>
       </motion.div>

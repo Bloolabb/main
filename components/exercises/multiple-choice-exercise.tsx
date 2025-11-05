@@ -4,6 +4,7 @@
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
 import { CheckCircle, XCircle } from "lucide-react"
+import { useState, useEffect } from "react"
 
 interface MultipleChoiceExerciseProps {
   exercise: any
@@ -12,11 +13,20 @@ interface MultipleChoiceExerciseProps {
 }
 
 export function MultipleChoiceExercise({ exercise, selectedAnswer, onAnswer }: MultipleChoiceExerciseProps) {
-  const options = Array.isArray(exercise.options) 
-    ? exercise.options 
-    : typeof exercise.options === 'string' 
-      ? JSON.parse(exercise.options.replace(/\\"/g, '"'))
-      : []
+  const [shuffledOptions, setShuffledOptions] = useState<string[]>([])
+
+  useEffect(() => {
+    // Parse and shuffle options whenever exercise changes
+    const options = Array.isArray(exercise.options) 
+      ? exercise.options 
+      : typeof exercise.options === 'string' 
+        ? JSON.parse(exercise.options.replace(/\\"/g, '"'))
+        : []
+
+    // Shuffle the options array
+    const shuffled = [...options].sort(() => Math.random() - 0.5)
+    setShuffledOptions(shuffled)
+  }, [exercise.options])
 
   const isCorrect = (option: string) => 
     selectedAnswer?.toLowerCase()?.trim() === exercise.correct_answer?.toLowerCase()?.trim()
@@ -32,7 +42,7 @@ export function MultipleChoiceExercise({ exercise, selectedAnswer, onAnswer }: M
       </motion.div>
 
       <div className="grid gap-3">
-        {options.map((option: string, index: number) => (
+        {shuffledOptions.map((option: string, index: number) => (
           <motion.div
             key={index}
             initial={{ opacity: 0, x: -20 }}
