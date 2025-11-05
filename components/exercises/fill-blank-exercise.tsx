@@ -17,7 +17,8 @@ const WORD_CATEGORIES = {
   business: ["strategy", "market", "profit", "customer", "product", "service", "brand", "growth"],
   innovation: ["creative", "unique", "novel", "original", "breakthrough", "disruptive", "pioneer"],
   problemSolving: ["solution", "resolve", "fix", "address", "tackle", "overcome", "resolve"],
-  general: ["develop", "create", "build", "design", "implement", "execute", "launch"]
+  general: ["develop", "create", "build", "design", "implement", "execute", "launch"],
+  ai: ["artificial", "intelligence", "machine", "learning", "neural", "network", "algorithm"]
 }
 
 export function FillBlankExercise({ exercise, answer, onAnswer }: FillBlankExerciseProps) {
@@ -40,7 +41,8 @@ export function FillBlankExercise({ exercise, answer, onAnswer }: FillBlankExerc
       ...WORD_CATEGORIES.business,
       ...WORD_CATEGORIES.innovation,
       ...WORD_CATEGORIES.problemSolving,
-      ...WORD_CATEGORIES.general
+      ...WORD_CATEGORIES.general,
+      ...WORD_CATEGORIES.ai
     ]
     
     // Filter out correct answers and shuffle
@@ -74,7 +76,8 @@ export function FillBlankExercise({ exercise, answer, onAnswer }: FillBlankExerc
       const existingAnswers = answer.split(';').map(ans => ans.trim())
       setBlanks(existingAnswers)
       
-      if (existingAnswers.some(ans => ans)) {
+      // Only mark attempt as used if ALL blanks are filled
+      if (existingAnswers.every(ans => ans.trim() !== "")) {
         setAttemptUsed(true)
         // Remove used words from word bank
         const remainingWords = wordBankData.filter(word => !existingAnswers.includes(word))
@@ -105,11 +108,16 @@ export function FillBlankExercise({ exercise, answer, onAnswer }: FillBlankExerc
     newBlanks[index] = draggedWord
     setBlanks(newBlanks)
     
-    // Simply remove the used word from word bank
+    // Remove the used word from word bank
     setWordBank(prev => prev.filter(w => w !== draggedWord))
     onAnswer(newBlanks.join(';'))
     setDraggedWord(null)
-    setAttemptUsed(true)
+    
+    // Only mark attempt as used when ALL blanks are filled
+    const allFilled = newBlanks.every(blank => blank.trim() !== "")
+    if (allFilled) {
+      setAttemptUsed(true)
+    }
   }
 
   const handleRemoveFromBlank = (index: number) => {
@@ -125,6 +133,9 @@ export function FillBlankExercise({ exercise, answer, onAnswer }: FillBlankExerc
     // Add the word back to word bank
     setWordBank(prev => [...prev, word])
     onAnswer(newBlanks.join(';'))
+    
+    // If removing a word, allow further attempts
+    setAttemptUsed(false)
   }
 
   const handleReset = () => {
@@ -157,7 +168,7 @@ export function FillBlankExercise({ exercise, answer, onAnswer }: FillBlankExerc
 
   return (
     <div className="space-y-6">
-      {/* One Attempt Warning */}
+      {/* One Attempt Warning - Only show when ALL blanks are filled */}
       {attemptUsed && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -165,7 +176,7 @@ export function FillBlankExercise({ exercise, answer, onAnswer }: FillBlankExerc
           className="p-4 bg-blue-50 border-2 border-blue-200 rounded-lg text-center"
         >
           <div className="text-blue-700 font-medium">
-            ⚠️ Attempt submitted. Use reset to try again.
+            ⚠️ All blanks filled! Use reset to try again.
           </div>
         </motion.div>
       )}
@@ -260,6 +271,11 @@ export function FillBlankExercise({ exercise, answer, onAnswer }: FillBlankExerc
       {/* Instructions */}
       <div className="text-sm text-gray-600 text-center">
         💡 Drag words from the bank to the blanks. {!attemptUsed && "Click on filled blanks to remove words."}
+        {blankCount > 1 && (
+          <div className="mt-1 text-blue-600">
+            Fill all {blankCount} blanks to submit your answer
+          </div>
+        )}
       </div>
 
       {/* Hint System */}
@@ -301,7 +317,7 @@ export function FillBlankExercise({ exercise, answer, onAnswer }: FillBlankExerc
         </Button>
       </div>
 
-      {/* Success/Failure Message */}
+      {/* Success/Failure Message - Only show when ALL blanks are filled */}
       <AnimatePresence>
         {attemptUsed && isComplete && (
           <motion.div
