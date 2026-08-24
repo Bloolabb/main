@@ -35,7 +35,7 @@ A Duolingo-style learning platform for kids aged 6-18 to learn AI and entreprene
 │   ├── supabase/          # Supabase client configuration
 │   └── utils.ts           # Helper functions
 └── scripts/               # Database migration scripts
-\\\
+```
 
 ## 🎮 Features
 
