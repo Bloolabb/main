@@ -9,46 +9,6 @@ A Duolingo-style learning platform for kids aged 6-18 to learn AI and entreprene
 - Supabase account
 - Vercel account (for deployment)
 
-### Installation
-
-1. **Clone the repository**
-   \`\`\`bash
-   git clone <repository-url>
-   cd bloolabb
-   \`\`\`
-
-2. **Install dependencies**
-   \`\`\`bash
-   npm install
-   \`\`\`
-
-3. **Set up environment variables**
-   Create a `.env.local` file with your Supabase credentials:
-   \`\`\`env
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-   \`\`\`
-
-4. **Run database migrations**
-   Execute the SQL scripts in the `scripts/` folder in order:
-   \`\`\`bash
-   # Run these in your Supabase SQL editor
-   scripts/001_create_database_schema.sql
-   scripts/002_create_profile_trigger.sql
-   scripts/003_seed_learning_content.sql
-   scripts/004_seed_exercises.sql
-   scripts/005_seed_badges.sql
-   scripts/007_create_admin_system.sql
-   scripts/008_security_improvements.sql
-   scripts/009_create_admin_user.sql
-   \`\`\`
-
-5. **Start development server**
-   \`\`\`bash
-   npm run dev
-   \`\`\`
-
 ## 🏗️ Architecture
 
 ### Tech Stack
@@ -59,7 +19,7 @@ A Duolingo-style learning platform for kids aged 6-18 to learn AI and entreprene
 - **Deployment**: Vercel
 
 ### Project Structure
-\`\`\`
+```
 ├── app/                    # Next.js app directory
 │   ├── (auth)/            # Authentication pages
 │   ├── admin/             # Admin dashboard
@@ -75,7 +35,7 @@ A Duolingo-style learning platform for kids aged 6-18 to learn AI and entreprene
 │   ├── supabase/          # Supabase client configuration
 │   └── utils.ts           # Helper functions
 └── scripts/               # Database migration scripts
-\`\`\`
+\\\
 
 ## 🎮 Features
 
@@ -97,18 +57,18 @@ A Duolingo-style learning platform for kids aged 6-18 to learn AI and entreprene
 ### Adding New Learning Content
 
 1. **Create a new lesson**:
-   \`\`\`sql
+   ```sql
    INSERT INTO lessons (module_id, title, content, xp_reward, order_index)
    VALUES ('module-id', 'Lesson Title', 'Lesson content...', 50, 1);
-   \`\`\`
+   ```
 
 2. **Add exercises to the lesson**:
-   \`\`\`sql
+   ```sql
    INSERT INTO exercises (lesson_id, type, question, options, correct_answer, explanation)
    VALUES ('lesson-id', 'multiple_choice', 'Question?', 
            ARRAY['Option 1', 'Option 2', 'Option 3', 'Option 4'],
            'Option 1', 'Explanation...');
-   \`\`\`
+   ```
 
 ### Customizing the UI
 
@@ -122,12 +82,6 @@ A Duolingo-style learning platform for kids aged 6-18 to learn AI and entreprene
 2. **Component**: Create new exercise component in `components/exercises/`
 3. **Engine**: Update `components/exercises/exercise-engine.tsx` to handle the new type
 
-### Admin Access
-
-**Default Admin Credentials**:
-- Email: `zvmmed@gmail.com`
-- Password: ``
-
 Access the admin dashboard at `/admin/login`
 
 ### API Endpoints
@@ -137,19 +91,6 @@ Access the admin dashboard at `/admin/login`
 - `POST /api/exercises/submit` - Submit exercise answers
 - `GET /api/user/progress` - Get user progress
 - `POST /api/badges/check` - Check for new badges
-
-## 🚀 Deployment
-
-### Vercel Deployment
-
-1. **Connect to Vercel**:
-   \`\`\`bash
-   vercel --prod
-   \`\`\`
-
-2. **Set environment variables** in Vercel dashboard
-
-3. **Configure Supabase** redirect URLs for production
 
 ### Database Setup
 
